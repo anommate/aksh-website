@@ -1,0 +1,30 @@
+# Text files: store and check out with LF, regardless of core.autocrlf.
+* text=auto eol=lf
+
+# Binary files: never normalise or diff as text.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.jfif  binary
+*.gif   binary
+*.webp  binary
+*.avif  binary
+*.ico   binary
+*.mp4   binary
+*.mov   binary
+*.webm  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.eot   binary
+*.pdf   binary
+*.docx  binary
+*.pptx  binary
+*.xlsx  binary
+*.zip   binary
+
+# Supplied originals and reference material: keep exact bytes (no line-ending conversion).
+docs/reference/**    -text
+assets/source/**     -text
+assets/reference/**  -text

@@ -1,0 +1,100 @@
+/* Scan only src/ for class names, so docs/ and assets/ never add CSS. */
+@import "tailwindcss" source("../");
+@import "../styles/tokens.css";
+
+/*
+ * Tailwind's built-in `container` sets breakpoint max-widths that contradict
+ * the specification's container. Never generate it; use aksh-container.
+ */
+@source not inline("container");
+
+/*
+ * Base styles. Tailwind's preflight already sets border-box sizing, removes
+ * heading/paragraph margins, and makes form controls inherit fonts.
+ */
+@layer base {
+  html {
+    background-color: var(--surface-page);
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--surface-page);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    font-weight: var(--weight-regular);
+    letter-spacing: var(--tracking-body);
+  }
+
+  /*
+   * Headings use the display family. Size comes from a role utility
+   * (text-page-title, text-section-heading, ...), not from the tag.
+   * No synthetic bold or italic for Cormorant Garamond.
+   */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    color: var(--text-heading);
+    font-synthesis: none;
+  }
+
+  /*
+   * Visible focus: a 2px outline with a 2px offset, which never shifts
+   * layout and stays visible in forced-colours mode.
+   */
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /*
+   * The skip-link target is a landmark that receives focus only so the next
+   * Tab continues from it; it is not a control, so it gets no ring.
+   */
+  [data-focus-target]:focus {
+    outline: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Page container: min(1280px, 100% minus both responsive gutters), centred. */
+@utility aksh-container {
+  width: calc(100% - 2 * var(--container-gutter));
+  max-width: var(--container-max);
+  margin-inline: auto;
+}
+
+@utility inset-0 {
+  inset: 0px;
+}
+
+@utility top-0 {
+  top: 0px;
+}
+
+@utility bottom-0 {
+  bottom: 0px;
+}
+
+@utility left-0 {
+  left: 0px;
+}
+
+@utility right-0 {
+  right: 0px;
+}

@@ -1,0 +1,42 @@
+# Local restructure snapshot (see docs/audit/ROLLBACK.md)
+.local-backup/
+
+# Third-party and superseded reference media: kept locally, never committed.
+# Conservative handling while rights are unverified; not a licensing decision
+# (docs/audit/DECISIONS.md D-17). assets/source/ stays trackable.
+assets/reference/
+
+# Homepage proposal screenshot of unknown origin (docs/audit/DECISIONS.md D-09):
+# kept locally, never committed. Transcribed in docs/content/HOMEPAGE_SECTIONS.md.
+docs/reference/proposals/Screenshot 2026-10-08 165402.png
+
+# Secrets and local environment (keep .env.example tracked)
+.env
+.env.*
+!.env.example
+*.pem
+
+# Dependencies and build output
+node_modules/
+.next/
+out/
+build/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+next-env.d.ts
+
+# Package-manager debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local hosting CLI link data
+.vercel
+
+# OS and editor files
+Thumbs.db
+desktop.ini
+.DS_Store

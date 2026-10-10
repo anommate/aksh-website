@@ -1,0 +1,67 @@
+operation,original_relative_path,new_relative_path,reason,before_sha256,after_sha256
+create-backup-dir,,.local-backup/restructure-2026-10-08/,Pre-change byte snapshot location (git-ignored); not removed by rollback,,
+create-dir,,assets/,Directory created by restructure,,
+create-dir,,docs/,Directory created by restructure,,
+create-dir,,assets/reference/,Directory created by restructure,,
+create-dir,,assets/source/,Directory created by restructure,,
+create-dir,,docs/audit/,Directory created by restructure,,
+create-dir,,docs/content/,Directory created by restructure,,
+create-dir,,docs/design/,Directory created by restructure,,
+create-dir,,docs/reference/,Directory created by restructure,,
+create-dir,,docs/requirements/,Directory created by restructure,,
+create-dir,,assets/reference/inspiration/,Directory created by restructure,,
+create-dir,,assets/reference/superseded-brand/,Directory created by restructure,,
+create-dir,,assets/source/brand/,Directory created by restructure,,
+create-dir,,docs/reference/originals/,Directory created by restructure,,
+create-dir,,docs/reference/proposals/,Directory created by restructure,,
+create-dir,,docs/reference/structural/,Directory created by restructure,,
+create-dir,,assets/reference/inspiration/logo/,Directory created by restructure,,
+create-dir,,assets/reference/inspiration/web/,Directory created by restructure,,
+backup-copy,AKSH_DESIGN.md,.local-backup/restructure-2026-10-08/original-root/AKSH_DESIGN.md,Pre-change byte snapshot (git-ignored),3edab6117db43f5adc46d7f2d91804f369e251ceae9ce8d1f850992f283274c0,3edab6117db43f5adc46d7f2d91804f369e251ceae9ce8d1f850992f283274c0
+backup-copy,AKSH_PRD.md,.local-backup/restructure-2026-10-08/original-root/AKSH_PRD.md,Pre-change byte snapshot (git-ignored),ce1fe5d60df0f407dc3da0d217939ebade521a7c9507d12a71bb89ef83d2223a,ce1fe5d60df0f407dc3da0d217939ebade521a7c9507d12a71bb89ef83d2223a
+backup-copy,AKSH_Technical_Requirements.md,.local-backup/restructure-2026-10-08/original-root/AKSH_Technical_Requirements.md,Pre-change byte snapshot (git-ignored),6e56bcd8b29f563db9ba776bc199e5e37499a441dd7c5bb823e10595afbd3456,6e56bcd8b29f563db9ba776bc199e5e37499a441dd7c5bb823e10595afbd3456
+backup-copy,DESIGN.md,.local-backup/restructure-2026-10-08/original-root/DESIGN.md,Pre-change byte snapshot (git-ignored),a0de8225fb315bc27b15cf9b8df17667a21e6007c83e45dd123be66b6bd9f5dd,a0de8225fb315bc27b15cf9b8df17667a21e6007c83e45dd123be66b6bd9f5dd
+backup-copy,Logo.jpeg,.local-backup/restructure-2026-10-08/original-root/Logo.jpeg,Pre-change byte snapshot (git-ignored),992076930eb0bab0c5e593dadcef6928516a762c687f82a524d08ebe128a097a,992076930eb0bab0c5e593dadcef6928516a762c687f82a524d08ebe128a097a
+backup-copy,Aksh Logo.png,.local-backup/restructure-2026-10-08/original-root/Aksh Logo.png,Pre-change byte snapshot (git-ignored),b810dc5b22f40fb46249aee9297a66d2f49556d70dfba313483def22a27d7dd7,b810dc5b22f40fb46249aee9297a66d2f49556d70dfba313483def22a27d7dd7
+backup-copy,Screenshot 2026-10-08 165402.png,.local-backup/restructure-2026-10-08/original-root/Screenshot 2026-10-08 165402.png,Pre-change byte snapshot (git-ignored),7442ce7b0e530c2dcbdb3458189a12d88ed87930fadbaadffa32c4f001f418f5,7442ce7b0e530c2dcbdb3458189a12d88ed87930fadbaadffa32c4f001f418f5
+backup-copy,Inspi/Home Page referance.png,.local-backup/restructure-2026-10-08/original-root/Inspi/Home Page referance.png,Pre-change byte snapshot (git-ignored),b47900c0e7c5b93836fe286aaece3a9bb5cee8e8a4c5280cc87a18d663e77e25,b47900c0e7c5b93836fe286aaece3a9bb5cee8e8a4c5280cc87a18d663e77e25
+backup-copy,Logo Inspi/A.jpg,.local-backup/restructure-2026-10-08/original-root/Logo Inspi/A.jpg,Pre-change byte snapshot (git-ignored),6aa39393ab116d31dedd379153d5dd55cbaf420050fc2baaf2ec75e39f3034d4,6aa39393ab116d31dedd379153d5dd55cbaf420050fc2baaf2ec75e39f3034d4
+backup-copy,Logo Inspi/B.jpg,.local-backup/restructure-2026-10-08/original-root/Logo Inspi/B.jpg,Pre-change byte snapshot (git-ignored),0783f243576241024c8b2abbcb20ecf312453dae17ea9c334d4db5be173bea23,0783f243576241024c8b2abbcb20ecf312453dae17ea9c334d4db5be173bea23
+backup-copy,Logo Inspi/C.jpg,.local-backup/restructure-2026-10-08/original-root/Logo Inspi/C.jpg,Pre-change byte snapshot (git-ignored),0a3940f5f8c20152157c762285e52f6a5da2527cff87751885938829cbd1bbe1,0a3940f5f8c20152157c762285e52f6a5da2527cff87751885938829cbd1bbe1
+backup-copy,Logo Inspi/D.jpg,.local-backup/restructure-2026-10-08/original-root/Logo Inspi/D.jpg,Pre-change byte snapshot (git-ignored),e0374db962de8a01c98fa4f2698a3aba421e3279b58d424338de94beab9d2af9,e0374db962de8a01c98fa4f2698a3aba421e3279b58d424338de94beab9d2af9
+backup-copy,Logo Inspi/Aurika – The Art of Glowing Grace.jfif,.local-backup/restructure-2026-10-08/original-root/Logo Inspi/Aurika – The Art of Glowing Grace.jfif,Pre-change byte snapshot (git-ignored),44d9c8e320814b2a7ba4b4434546f2dd0e26d580a4da2edd0db4fa12b4b241e8,44d9c8e320814b2a7ba4b4434546f2dd0e26d580a4da2edd0db4fa12b4b241e8
+backup-copy,Logo Inspi/47799-451812887.mp4,.local-backup/restructure-2026-10-08/original-root/Logo Inspi/47799-451812887.mp4,Pre-change byte snapshot (git-ignored),58457a4358a9e0acc9de3a066bebafaf51ed94ea0e5b058c5fc58d20baf59124,58457a4358a9e0acc9de3a066bebafaf51ed94ea0e5b058c5fc58d20baf59124
+move,AKSH_DESIGN.md,docs/design/AKSH_DESIGN.md,Current canonical design system v2.0; bytes unchanged,3edab6117db43f5adc46d7f2d91804f369e251ceae9ce8d1f850992f283274c0,3edab6117db43f5adc46d7f2d91804f369e251ceae9ce8d1f850992f283274c0
+move,AKSH_PRD.md,docs/reference/originals/AKSH_PRD_v1.1_original.md,Preserve unedited PRD v1.1; canonical edited copy lives in docs/requirements/,ce1fe5d60df0f407dc3da0d217939ebade521a7c9507d12a71bb89ef83d2223a,ce1fe5d60df0f407dc3da0d217939ebade521a7c9507d12a71bb89ef83d2223a
+move,AKSH_Technical_Requirements.md,docs/reference/originals/AKSH_Technical_Requirements_v1.0_original.md,Preserve unedited TRD v1.0; canonical edited copy lives in docs/requirements/,6e56bcd8b29f563db9ba776bc199e5e37499a441dd7c5bb823e10595afbd3456,6e56bcd8b29f563db9ba776bc199e5e37499a441dd7c5bb823e10595afbd3456
+move,DESIGN.md,docs/reference/structural/Apple_Style_Reference_DESIGN.md,Apple structural reference; renamed so tools do not treat a root DESIGN.md as AKSH branding,a0de8225fb315bc27b15cf9b8df17667a21e6007c83e45dd123be66b6bd9f5dd,a0de8225fb315bc27b15cf9b8df17667a21e6007c83e45dd123be66b6bd9f5dd
+move,Logo.jpeg,assets/source/brand/Logo.jpeg,"Current AKSH logo artwork (matches v2.0 palette); source, not yet approved for public/",992076930eb0bab0c5e593dadcef6928516a762c687f82a524d08ebe128a097a,992076930eb0bab0c5e593dadcef6928516a762c687f82a524d08ebe128a097a
+move,Aksh Logo.png,assets/reference/superseded-brand/Aksh Logo.png,Superseded teal/gold logo concept; history only,b810dc5b22f40fb46249aee9297a66d2f49556d70dfba313483def22a27d7dd7,b810dc5b22f40fb46249aee9297a66d2f49556d70dfba313483def22a27d7dd7
+move,Screenshot 2026-10-08 165402.png,docs/reference/proposals/Screenshot 2026-10-08 165402.png,Homepage section proposal (unknown source/approval); transcribed in docs/content/,7442ce7b0e530c2dcbdb3458189a12d88ed87930fadbaadffa32c4f001f418f5,7442ce7b0e530c2dcbdb3458189a12d88ed87930fadbaadffa32c4f001f418f5
+move,Inspi/Home Page referance.png,assets/reference/inspiration/web/Home Page referance.png,Third-party website screenshot; layout inspiration only,b47900c0e7c5b93836fe286aaece3a9bb5cee8e8a4c5280cc87a18d663e77e25,b47900c0e7c5b93836fe286aaece3a9bb5cee8e8a4c5280cc87a18d663e77e25
+move,Logo Inspi/A.jpg,assets/reference/inspiration/logo/A.jpg,Third-party logo inspiration,6aa39393ab116d31dedd379153d5dd55cbaf420050fc2baaf2ec75e39f3034d4,6aa39393ab116d31dedd379153d5dd55cbaf420050fc2baaf2ec75e39f3034d4
+move,Logo Inspi/B.jpg,assets/reference/inspiration/logo/B.jpg,Third-party logo inspiration,0783f243576241024c8b2abbcb20ecf312453dae17ea9c334d4db5be173bea23,0783f243576241024c8b2abbcb20ecf312453dae17ea9c334d4db5be173bea23
+move,Logo Inspi/C.jpg,assets/reference/inspiration/logo/C.jpg,Third-party logo inspiration,0a3940f5f8c20152157c762285e52f6a5da2527cff87751885938829cbd1bbe1,0a3940f5f8c20152157c762285e52f6a5da2527cff87751885938829cbd1bbe1
+move,Logo Inspi/D.jpg,assets/reference/inspiration/logo/D.jpg,Third-party logo inspiration,e0374db962de8a01c98fa4f2698a3aba421e3279b58d424338de94beab9d2af9,e0374db962de8a01c98fa4f2698a3aba421e3279b58d424338de94beab9d2af9
+move,Logo Inspi/Aurika – The Art of Glowing Grace.jfif,assets/reference/inspiration/logo/Aurika – The Art of Glowing Grace.jfif,Third-party logo inspiration,44d9c8e320814b2a7ba4b4434546f2dd0e26d580a4da2edd0db4fa12b4b241e8,44d9c8e320814b2a7ba4b4434546f2dd0e26d580a4da2edd0db4fa12b4b241e8
+move,Logo Inspi/47799-451812887.mp4,assets/reference/inspiration/logo/47799-451812887.mp4,Reference video grouped with logo inspiration; content and licence unverified,58457a4358a9e0acc9de3a066bebafaf51ed94ea0e5b058c5fc58d20baf59124,58457a4358a9e0acc9de3a066bebafaf51ed94ea0e5b058c5fc58d20baf59124
+remove-empty-dir,Inspi/,,Folder emptied by moves; rmdir only succeeds when empty,,
+remove-empty-dir,Logo Inspi/,,Folder emptied by moves; rmdir only succeeds when empty,,
+copy-edit,docs/reference/originals/AKSH_PRD_v1.1_original.md,docs/requirements/AKSH_PRD.md,Canonical PRD: copy of original with visual/brand passages aligned to design spec v2.0 (see DECISIONS.md),ce1fe5d60df0f407dc3da0d217939ebade521a7c9507d12a71bb89ef83d2223a,54351ac67f0d760388a925dba601a6f2763dfcbdbbdeedfa9293eefd5a25d154
+copy-edit,docs/reference/originals/AKSH_Technical_Requirements_v1.0_original.md,docs/requirements/AKSH_Technical_Requirements.md,Canonical TRD: copy of original with visual/brand passages aligned to design spec v2.0 (see DECISIONS.md),6e56bcd8b29f563db9ba776bc199e5e37499a441dd7c5bb823e10595afbd3456,725468009efd1122e780145d03b91bb6649c05e3bf9218d0eb9e5bdf99cfdcda
+create,,.gitignore,"Exclude local backup, secrets, and future build output",,249ff5462aa11e674f409c63e561d7694f99b566d28514859b781b07f9360df9
+create,,CLAUDE.md,Concise agent guidance linking canonical documents,,25c1731eafe95c7bf73f6b8ed7cec9a8d689fc383ed310db7e46623ea37304d6
+create,,README.md,"Project purpose, document map, structure, readiness",,5d13a648d9032245a327d6c236015cf7e9fa0c2f78886efb666ffd82821cb2c1
+create,,assets/README.md,Labels asset folders and shipping rules,,f59338ebcdc0626574fa5f9aba5bc5810feb9f14ce8259c6571db2bb1ca7dbb5
+create,,docs/audit/ASSET_INVENTORY.md,"Asset status, rights, dimensions, gaps",,a616c2bb195cb43ff86f5deb8a0a95aef768396ed2459318e70dab43a0725e6b
+create,,docs/audit/DECISIONS.md,"Source precedence, decisions, edits to canonical copies, open questions",,59e532e0a4745697f85da96e2af55b2331875d2b4d6d07933d19cbfff6d2d4ad
+create,,docs/audit/DEVELOPMENT_PLAN.md,Ordered milestones with acceptance criteria,,252940e11dc8c8931b408899f384eacc5e646c67750c3a21162704202ff91254
+create,,docs/audit/FINAL_AUDIT.md,Phase 5 verification report,,3fe1686ab1b8d373f0d2417752181ea325866203499d1c09d7784e9ef6acf3f7
+create,,docs/audit/INITIAL_AUDIT.md,Phase 1 audit written before changes,,a45bf33e1f4b38774404e5d1ca33f3cf8cdfc25a6d68ad4c1708f99cd34234a5
+create,,docs/audit/RESTRUCTURE_MANIFEST.csv,This manifest,,n/a (self)
+create,,docs/audit/ROLLBACK.md,Rollback instructions,,3b96a74dd08208e4be7fbba58e3bc58b5377846393f1a36811d5977906d9b008
+create,,docs/audit/rollback_restructure.py,Manifest-driven rollback script (dry run by default),,84ef3cee4aac532c9959eeff50c5ad6a537ea7990bb781b996e9e722cec2fbe7
+create,,docs/content/CONTENT_STATUS.md,"Confirmed facts, fixed UI wording, missing clinic inputs",,c0a2b6731d4a39c4561a79a652cff3fc6d17d8975c495fd37738fa6e161aef39
+create,,docs/content/HOMEPAGE_SECTIONS.md,Reconciles PRD homepage with screenshot proposal,,4ad3ae96ac1d184f62889bdf137564f300b441b8d1de26b5ff6c4ecf1be68baa
+create,,docs/design/README.md,Design source/precedence notes; resolves references inside AKSH_DESIGN.md,,e9c5538497b3802d0fd0925fd57db77d8b14b753078f8d65b7666d72e35f8fde
+create,,docs/reference/README.md,Labels reference documents as non-requirements,,f69eeed6d59615926d31fa6aff9d0b2b1ecaa25c822ef7d1a33de015661abe60

@@ -1,0 +1,371 @@
+/*
+ * AKSH design tokens.
+ *
+ * Every value comes from docs/design/AKSH_DESIGN.md (v2.0): the Quick Start
+ * custom properties, the role tables, and their tablet and mobile overrides.
+ * Change a value here, never in a component.
+ *
+ * Tokens whose names fall in a Tailwind theme namespace (--color-*, --font-*,
+ * --text-*, --leading-*, --tracking-*, --spacing-*, --radius-*, --shadow-*,
+ * --ease-*, --breakpoint-*) live in @theme, so the declaration is both the CSS
+ * variable and the source of its utility (bg-brand-ivory, text-body, p-24,
+ * rounded-card, tablet:...). Everything else is a plain custom property.
+ *
+ * The responsive blocks at the end override variables only; utilities read
+ * the variables, so they follow the breakpoint automatically.
+ */
+
+@theme static {
+  /*
+   * Drop Tailwind's default theme. Only AKSH values generate utilities: no
+   * stock palette (which includes teal and amber scales), fonts, spacing,
+   * radii, shadows, or breakpoints.
+   */
+  --*: initial;
+
+  /* Breakpoints: mobile is the unprefixed base, below 768px. */
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+
+  /* Brand palette: exact values from the latest moodboard. */
+  --color-logo-black: #000000;
+  --color-brand-ivory: #F9F8F4;
+  --color-signal-red: #FF0000;
+  --color-warm-stone: #E4DED3;
+  --color-quiet-sage: #A7B0A1;
+  --color-soft-charcoal: #282826;
+  /* Derived functional neutrals. */
+  --color-muted-text: #645F57;
+  --color-control-outline: #7C776E;
+
+  /*
+   * Families. --font-cormorant-garamond and --font-manrope are set by
+   * next/font on <html> (src/styles/fonts.ts); the named fallbacks are the
+   * specification's loading fallbacks.
+   */
+  --font-display: var(--font-cormorant-garamond, 'Cormorant Garamond'), Georgia, 'Times New Roman', serif;
+  --font-body: var(--font-manrope, 'Manrope'), Arial, system-ui, sans-serif;
+  --font-ui: var(--font-body);
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --font-weight-regular: var(--weight-regular);
+  --font-weight-medium: var(--weight-medium);
+  --font-weight-semibold: var(--weight-semibold);
+  --font-weight-bold: var(--weight-bold);
+
+  /* Tracking. Display tracking becomes 0em on mobile. */
+  --tracking-display: -0.01em;
+  --tracking-body: 0em;
+  /* Short uppercase eyebrow labels only: pair tracking-eyebrow with uppercase. */
+  --tracking-eyebrow: 0.08em;
+
+  /*
+   * Type scale (desktop values). Each text-<role> utility sets size, leading,
+   * tracking, and weight; pair display roles with font-display.
+   */
+  --text-hero-display: 80px;
+  --leading-hero-display: 88px;
+  --text-hero-display--line-height: var(--leading-hero-display);
+  --text-hero-display--letter-spacing: var(--tracking-display);
+  --text-hero-display--font-weight: var(--weight-semibold);
+
+  --text-page-title: 64px;
+  --leading-page-title: 72px;
+  --text-page-title--line-height: var(--leading-page-title);
+  --text-page-title--letter-spacing: var(--tracking-display);
+  --text-page-title--font-weight: var(--weight-semibold);
+
+  --text-section-heading: 56px;
+  --leading-section-heading: 64px;
+  --text-section-heading--line-height: var(--leading-section-heading);
+  --text-section-heading--letter-spacing: var(--tracking-display);
+  --text-section-heading--font-weight: var(--weight-semibold);
+
+  --text-feature-heading: 40px;
+  --leading-feature-heading: 48px;
+  --text-feature-heading--line-height: var(--leading-feature-heading);
+  --text-feature-heading--letter-spacing: var(--tracking-body);
+  --text-feature-heading--font-weight: var(--weight-semibold);
+
+  --text-card-heading: 28px;
+  --leading-card-heading: 36px;
+  --text-card-heading--line-height: var(--leading-card-heading);
+  --text-card-heading--letter-spacing: var(--tracking-body);
+  --text-card-heading--font-weight: var(--weight-semibold);
+
+  --text-quote: 32px;
+  --leading-quote: 44px;
+  --text-quote--line-height: var(--leading-quote);
+  --text-quote--letter-spacing: var(--tracking-body);
+  --text-quote--font-weight: var(--weight-medium);
+
+  --text-lead: 20px;
+  --leading-lead: 32px;
+  --text-lead--line-height: var(--leading-lead);
+  --text-lead--letter-spacing: var(--tracking-body);
+  --text-lead--font-weight: var(--weight-regular);
+
+  --text-body: 18px;
+  --leading-body: 30px;
+  --text-body--line-height: var(--leading-body);
+  --text-body--letter-spacing: var(--tracking-body);
+  --text-body--font-weight: var(--weight-regular);
+
+  --text-body-small: 14px;
+  --leading-body-small: 22px;
+  --text-body-small--line-height: var(--leading-body-small);
+  --text-body-small--letter-spacing: var(--tracking-body);
+  --text-body-small--font-weight: var(--weight-regular);
+
+  --text-nav: 14px;
+  --leading-nav: 20px;
+  --text-nav--line-height: var(--leading-nav);
+  --text-nav--letter-spacing: var(--tracking-body);
+  --text-nav--font-weight: var(--weight-medium);
+
+  --text-button: 14px;
+  --leading-button: 20px;
+  --text-button--line-height: var(--leading-button);
+  --text-button--letter-spacing: var(--tracking-body);
+  --text-button--font-weight: var(--weight-semibold);
+
+  --text-label: 14px;
+  --leading-label: 20px;
+  --text-label--line-height: var(--leading-label);
+  --text-label--letter-spacing: var(--tracking-body);
+  --text-label--font-weight: var(--weight-semibold);
+
+  --text-input: 16px;
+  --leading-input: 24px;
+  --text-input--line-height: var(--leading-input);
+  --text-input--letter-spacing: var(--tracking-body);
+  --text-input--font-weight: var(--weight-regular);
+
+  --text-eyebrow: 12px;
+  --leading-eyebrow: 18px;
+  --text-eyebrow--line-height: var(--leading-eyebrow);
+  --text-eyebrow--letter-spacing: var(--tracking-body);
+  --text-eyebrow--font-weight: var(--weight-semibold);
+
+  --text-footer: 14px;
+  --leading-footer: 22px;
+  --text-footer--line-height: var(--leading-footer);
+  --text-footer--letter-spacing: var(--tracking-body);
+  --text-footer--font-weight: var(--weight-regular);
+
+  /* Spacing scale: 4px base; 90px is the reference's deliberate exception. */
+  --spacing-0: 0px;
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-28: 28px;
+  --spacing-32: 32px;
+  --spacing-40: 40px;
+  --spacing-48: 48px;
+  --spacing-52: 52px;
+  --spacing-56: 56px;
+  --spacing-64: 64px;
+  --spacing-72: 72px;
+  --spacing-80: 80px;
+  --spacing-90: 90px;
+  --spacing-96: 96px;
+  --spacing-128: 128px;
+
+  /* Radii (desktop/tablet; mobile overrides below). */
+  --radius-card: 28px;
+  --radius-image: 28px;
+  --radius-panel: 16px;
+  --radius-input: 12px;
+  --radius-button: 9999px;
+  --radius-link: 4px;
+  --radius-chip: 9999px;
+  --radius-checkbox: 4px;
+  --radius-circle: 50%;
+  --radius-navigation: 0px;
+  --radius-overlay: 16px;
+  --radius-status: 0px;
+
+  /* Elevation is zero: cards and editorial surfaces have no cast shadow. */
+  --shadow-card: none;
+
+  /* Motion. */
+  --duration-fast: 150ms;
+  --duration-standard: 200ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --default-transition-duration: var(--duration-standard);
+  --default-transition-timing-function: var(--ease-standard);
+
+  --default-font-family: var(--font-body);
+}
+
+/*
+ * Plain custom properties. These stay out of @theme because their names would
+ * collide with Tailwind namespaces: the semantic --text-* aliases are colours,
+ * but Tailwind reads --text-* as font sizes, and --container-* would shadow
+ * Tailwind's max-width keywords. Use them through var(), for example
+ * bg-(--surface-page) or max-w-(--measure-prose).
+ */
+:root {
+  --spacing-unit: 4px;
+
+  /* Semantic aliases. */
+  --surface-page: var(--color-brand-ivory);
+  --surface-alt: var(--color-warm-stone);
+  --surface-inverse: var(--color-soft-charcoal);
+  --text-primary: var(--color-soft-charcoal);
+  --text-heading: var(--color-logo-black);
+  --text-secondary: var(--color-muted-text);
+  --text-inverse: var(--color-brand-ivory);
+  --action-primary: var(--color-logo-black);
+  --action-primary-hover: var(--color-soft-charcoal);
+  --action-primary-text: var(--color-brand-ivory);
+
+  /* Layout and grid. */
+  --container-max: 1280px;
+  --container-gutter: var(--spacing-48);
+  --grid-columns: 12;
+  --grid-gap: var(--spacing-24);
+  --section-gap: var(--spacing-90);
+  --section-band-inset: var(--spacing-64);
+  --page-inset: var(--spacing-64);
+  --card-padding: var(--spacing-28);
+  --element-gap: var(--spacing-20);
+  --media-column-gap: var(--spacing-64);
+  --form-row-gap: var(--spacing-24);
+  --header-height: var(--spacing-80);
+
+  /* Controls. The 15px and 13px button insets are border-adjusted exceptions. */
+  --control-min-height: var(--spacing-52);
+  --button-padding-block: 15px;
+  --button-padding-inline: var(--spacing-24);
+  --target-min-size: 44px;
+
+  /* Maximum line lengths (not fixed widths). */
+  --measure-hero: 12ch;
+  --measure-page-title: 16ch;
+  --measure-section-heading: 20ch;
+  --measure-lead: 48ch;
+  --measure-prose: 65ch;
+
+  /* Typography spacing: one owner per relationship (gap or margin, never both). */
+  --space-eyebrow-heading: var(--spacing-12);
+  --space-title-lead: var(--spacing-24);
+  --space-heading-intro: var(--spacing-20);
+  --space-intro-content: var(--spacing-40);
+  --space-card-heading-description: var(--spacing-12);
+  --space-paragraph: var(--spacing-20);
+  --space-body-action: var(--spacing-28);
+  --space-article-heading-before: var(--spacing-48);
+  --space-article-heading-after: var(--spacing-16);
+  --space-list-item: var(--spacing-8);
+  --space-caption-media: var(--spacing-12);
+
+  /* Borders and focus. */
+  --border-width: 1px;
+  --border-width-selected: 2px;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --focus-ring-color: var(--color-logo-black);
+  --focus-ring-light: 0 0 0 var(--focus-ring-offset) var(--color-brand-ivory),
+    0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--color-logo-black);
+  --focus-ring-inverse: 0 0 0 var(--focus-ring-offset) var(--color-logo-black),
+    0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--color-brand-ivory);
+}
+
+/* Tablet: 768–1023px. */
+@media (theme(--breakpoint-tablet) <= width < theme(--breakpoint-desktop)) {
+  :root {
+    --text-hero-display: 64px;
+    --leading-hero-display: 72px;
+    --text-page-title: 56px;
+    --leading-page-title: 64px;
+    --text-section-heading: 44px;
+    --leading-section-heading: 52px;
+    --text-feature-heading: 36px;
+    --leading-feature-heading: 44px;
+    --text-quote: 28px;
+    --leading-quote: 40px;
+    --text-lead: 18px;
+    --leading-lead: 30px;
+
+    --container-gutter: var(--spacing-32);
+    --grid-columns: 8;
+    --section-gap: var(--spacing-72);
+    --section-band-inset: var(--spacing-48);
+    --page-inset: var(--spacing-48);
+    --card-padding: var(--spacing-24);
+    --media-column-gap: var(--spacing-40);
+    --header-height: var(--spacing-64);
+
+    --space-intro-content: var(--spacing-32);
+    --space-body-action: var(--spacing-24);
+    --space-article-heading-before: var(--spacing-40);
+  }
+}
+
+/* Mobile: below 768px. */
+@media (width < theme(--breakpoint-tablet)) {
+  :root {
+    --text-hero-display: 44px;
+    --leading-hero-display: 52px;
+    --text-page-title: 40px;
+    --leading-page-title: 48px;
+    --text-section-heading: 36px;
+    --leading-section-heading: 44px;
+    --text-feature-heading: 28px;
+    --leading-feature-heading: 36px;
+    --text-card-heading: 24px;
+    --leading-card-heading: 32px;
+    --text-quote: 24px;
+    --leading-quote: 36px;
+    --text-lead: 18px;
+    --leading-lead: 30px;
+    --text-body: 16px;
+    --leading-body: 28px;
+    --text-nav: 16px;
+    --leading-nav: 24px;
+    --text-button: 16px;
+    --leading-button: 24px;
+    --tracking-display: 0em;
+
+    --button-padding-block: 13px;
+    --container-gutter: var(--spacing-20);
+    --grid-columns: 4;
+    --grid-gap: var(--spacing-16);
+    --section-gap: var(--spacing-56);
+    --section-band-inset: var(--spacing-32);
+    --page-inset: var(--spacing-32);
+    --card-padding: var(--spacing-20);
+    --element-gap: var(--spacing-16);
+    --media-column-gap: var(--spacing-28);
+    --header-height: var(--spacing-64);
+
+    --radius-card: 20px;
+    --radius-image: 20px;
+    --radius-panel: 12px;
+    --radius-overlay: 12px;
+
+    --space-eyebrow-heading: var(--spacing-8);
+    --space-title-lead: var(--spacing-20);
+    --space-heading-intro: var(--spacing-16);
+    --space-intro-content: var(--spacing-28);
+    --space-paragraph: var(--spacing-16);
+    --space-body-action: var(--spacing-24);
+    --space-article-heading-before: var(--spacing-32);
+    --space-article-heading-after: var(--spacing-12);
+    --space-caption-media: var(--spacing-8);
+  }
+}
+
+/* Narrow mobile: the specification's 320–359px range uses a 16px gutter. */
+@media (width < 360px) {
+  :root {
+    --container-gutter: var(--spacing-16);
+  }
+}
