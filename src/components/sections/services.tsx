@@ -8,11 +8,13 @@ import { servicesContent } from "@/content/services";
 /**
  * Homepage Services Section
  *
- * - Ivory masthead: owner-supplied "OUR SERVICES" artwork centred above the
- *   eyebrow with signal dot, H2 and introduction
- * - Warm Stone band with ivory cards (design spec: ivory against stone)
- * - Four numbered cards; on tall-enough desktop viewports they stack with
- *   native sticky scrolling (see ServiceStack), otherwise they flow normally
+ * - One continuous ivory surface: owner-supplied "OUR SERVICES" artwork
+ *   centred above the eyebrow with signal dot, H2 and introduction, then the
+ *   card stack
+ * - Ivory cards with a fine stone outline (design spec: stone outline on ivory)
+ * - Four numbered cards; where they can stack safely they do so with native
+ *   sticky scrolling (see ServiceStack), otherwise they flow normally
+ * - Bottom inset keeps the stack's settled end clear of what follows
  * - Anchor target #services lands 24px below the sticky header
  */
 export function ServicesSection() {
@@ -20,11 +22,11 @@ export function ServicesSection() {
     <section
       id={servicesContent.id}
       aria-labelledby="services-heading"
-      className="w-full mt-(--section-gap) scroll-mt-[calc(var(--header-height)+var(--border-width)+var(--spacing-24))]"
+      className="w-full pb-(--section-band-inset) bg-brand-ivory scroll-mt-[calc(var(--header-height)+var(--border-width)+var(--spacing-24))]"
     >
-      {/* Ivory masthead surface to carry the artwork's own textured ivory ground. */}
-      <div data-services-masthead className="bg-brand-ivory pb-(--space-intro-content)">
-        <Container>
+      {/* One ivory surface for the artwork, introduction and card stack. */}
+      <Container>
+        <div data-services-masthead className="pb-(--space-intro-content)">
           <div className="flex justify-center mb-20 tablet:mb-24">
             <Image
               src={servicesContent.artwork.src}
@@ -58,24 +60,20 @@ export function ServicesSection() {
               {servicesContent.introduction}
             </p>
           </div>
-        </Container>
-      </div>
+        </div>
 
-      <div className="bg-warm-stone py-(--section-band-inset)">
-        <Container>
-          <ServiceStack className="flex flex-col gap-(--grid-gap)">
-            {servicesContent.categories.map((category, index) => (
-              <li
-                key={category.id}
-                data-service-stack-item
-                style={{ "--service-stack-index": index } as CSSProperties}
-              >
-                <ServiceCard category={category} />
-              </li>
-            ))}
-          </ServiceStack>
-        </Container>
-      </div>
+        <ServiceStack className="flex flex-col gap-(--grid-gap)">
+          {servicesContent.categories.map((category, index) => (
+            <li
+              key={category.id}
+              data-service-stack-item
+              style={{ "--service-stack-index": index } as CSSProperties}
+            >
+              <ServiceCard category={category} />
+            </li>
+          ))}
+        </ServiceStack>
+      </Container>
     </section>
   );
 }

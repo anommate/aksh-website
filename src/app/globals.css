@@ -122,6 +122,27 @@
   }
 }
 
+/*
+ * Section divider (src/components/ui/section-divider.tsx). Complete by
+ * default; the client collapses the segments towards the dot while the
+ * divider is off screen, then draws them once on first entry.
+ */
+@layer components {
+  [data-section-divider][data-reveal="pending"] [data-divider-segment] {
+    transform: scaleX(0);
+  }
+
+  [data-section-divider][data-reveal="drawn"] [data-divider-segment] {
+    transition: transform var(--duration-draw) var(--ease-draw);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-section-divider][data-reveal] [data-divider-segment] {
+      transform: none;
+    }
+  }
+}
+
 /* Page container: min(1280px, 100% minus both responsive gutters), centred. */
 @utility aksh-container {
   width: calc(100% - 2 * var(--container-gutter));

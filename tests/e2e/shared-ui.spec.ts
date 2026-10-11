@@ -102,10 +102,10 @@ test.describe("decorative signal dots", () => {
   }
 
   for (const width of [1440, 390]) {
-    test(`hero, About, Services and dialog dots are 6x6px (${width}px)`, async ({ page }) => {
+    test(`hero, About, divider, Services and dialog dots are 6x6px (${width}px)`, async ({ page }) => {
       await open(page, width, 844);
       const dots = page.locator("main span.bg-signal-red.rounded-circle");
-      await expect(dots).toHaveCount(3);
+      await expect(dots).toHaveCount(4);
       for (const dot of await dots.all()) await expectDot(dot);
 
       await page.getByRole("button", { name: "Discover AKSH" }).click();

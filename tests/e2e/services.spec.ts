@@ -256,11 +256,11 @@ test.describe("services content", () => {
   });
 
   const MASTHEAD_VIEWPORTS = [
-    { width: 1440, height: 900, artwork: 440, gap: 24 },
-    { width: 1366, height: 768, artwork: 440, gap: 24 },
-    { width: 768, height: 1024, artwork: 440, gap: 24 },
-    { width: 390, height: 844, artwork: 350, gap: 20 },
-    { width: 320, height: 568, artwork: 288, gap: 20 },
+    { width: 1440, height: 900, artwork: 440, gap: 24, cards: 40 },
+    { width: 1366, height: 768, artwork: 440, gap: 24, cards: 40 },
+    { width: 768, height: 1024, artwork: 440, gap: 24, cards: 32 },
+    { width: 390, height: 844, artwork: 350, gap: 20, cards: 28 },
+    { width: 320, height: 568, artwork: 288, gap: 20, cards: 28 },
   ];
 
   for (const viewport of MASTHEAD_VIEWPORTS) {
@@ -275,7 +275,13 @@ test.describe("services content", () => {
         const container = img.closest(".aksh-container")!.getBoundingClientRect();
         const eyebrow = img.closest("[data-services-masthead]")!.querySelector(".grid")!.getBoundingClientRect();
         const masthead = img.closest("[data-services-masthead]")!;
-        const band = masthead.nextElementSibling!;
+        const list = masthead.parentElement!.querySelector("ol")!;
+        const section = img.closest("section")!;
+        // Every box from the card list up to the section: one ivory surface.
+        const surfaces: string[] = [];
+        for (let el: Element | null = list; el && el !== section.parentElement; el = el.parentElement) {
+          surfaces.push(getComputedStyle(el).backgroundColor);
+        }
         return {
           intrinsic: [Number(img.getAttribute("width")), Number(img.getAttribute("height"))],
           naturalRatio: img.naturalHeight / img.naturalWidth,
@@ -286,8 +292,8 @@ test.describe("services content", () => {
           insideContainer: rect.left >= container.left - 0.5 && rect.right <= container.right + 0.5,
           unclipped: parent.top <= rect.top + 0.5 && parent.bottom >= rect.bottom - 0.5,
           gapToIntroduction: eyebrow.top - rect.bottom,
-          mastheadSurface: getComputedStyle(masthead).backgroundColor,
-          stackSurface: getComputedStyle(band).backgroundColor,
+          introToCards: list.getBoundingClientRect().top - eyebrow.bottom,
+          surfaces,
         };
       });
 
@@ -304,8 +310,10 @@ test.describe("services content", () => {
       expect(geometry.insideContainer).toBe(true);
       expect(geometry.unclipped).toBe(true);
       expect(Math.abs(geometry.gapToIntroduction - viewport.gap)).toBeLessThanOrEqual(0.5);
-      expect(geometry.mastheadSurface).toBe("rgb(249, 248, 244)");
-      expect(geometry.stackSurface).toBe("rgb(228, 222, 211)");
+      expect(Math.abs(geometry.introToCards - viewport.cards)).toBeLessThanOrEqual(0.5);
+      // No stone band: only the section paints a background, in Brand Ivory.
+      expect(geometry.surfaces.at(-1)).toBe("rgb(249, 248, 244)");
+      for (const surface of geometry.surfaces.slice(0, -1)) expect(surface).toBe("rgba(0, 0, 0, 0)");
 
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth

@@ -198,6 +198,9 @@
   --duration-fast: 150ms;
   --duration-standard: 200ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  /* One-off reveal of decorative rules (section divider): slow, gentle ease-out. */
+  --duration-draw: 800ms;
+  --ease-draw: cubic-bezier(0.33, 1, 0.68, 1);
   --default-transition-duration: var(--duration-standard);
   --default-transition-timing-function: var(--ease-standard);
 

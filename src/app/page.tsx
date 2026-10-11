@@ -1,12 +1,19 @@
 import { Hero } from "@/components/sections/hero";
 import { AboutSection } from "@/components/sections/about";
 import { ServicesSection } from "@/components/sections/services";
+import { SectionDivider } from "@/components/ui/section-divider";
 
 export default function Home() {
   return (
     <>
       <Hero />
       <AboutSection />
+      {/*
+        About keeps its own bottom padding (32/40/32px), so the divider adds
+        only what balances it: about 40px either side on desktop and tablet,
+        about 30px on mobile, counting the margin inside the Services artwork.
+      */}
+      <SectionDivider className="desktop:pt-8 pb-20 tablet:pb-28" />
       <ServicesSection />
     </>
   );
