@@ -72,6 +72,56 @@
   }
 }
 
+/*
+ * Homepage service card stack (src/components/sections/service-stack.tsx).
+ * Cards render as a normal-flow list. Without a reduced-motion preference,
+ * the client sets data-stack="on" once the cards can stack safely; each card
+ * then sticks and the next one rises over it with native scrolling.
+ * The default top is header-aware and one step lower per card. For cards
+ * taller than the visible area (tablet and mobile), the client sets a
+ * measured --service-stack-top that pins the card by its bottom edge and an
+ * --service-stack-origin so it recedes towards that edge. Covered cards
+ * recede by --service-stack-depth, which the client derives from scroll
+ * position.
+ */
+@layer components {
+  @media (prefers-reduced-motion: no-preference) {
+    /*
+     * Trailing space, measured by the client, so the last card can settle. It
+     * is a flex item (not padding) because sticky cards may only move within
+     * the list's content box; the negative margin cancels the list's row gap.
+     */
+    [data-stack="on"][data-stack-tail]::after {
+      content: "";
+      height: var(--service-stack-tail);
+      margin-top: calc(-1 * var(--grid-gap));
+    }
+
+    [data-stack="on"] > [data-service-stack-item] {
+      position: sticky;
+      top: var(
+        --service-stack-top,
+        calc(
+          var(--header-height) + var(--border-width) + var(--service-stack-gap) +
+            var(--service-stack-index) * var(--service-stack-step)
+        )
+      );
+      z-index: calc(var(--service-stack-index) + 1);
+    }
+
+    [data-stack="on"] [data-service-card] {
+      min-height: var(--service-stack-card-height);
+      transform: scale(
+        calc(
+          1 - min(var(--service-stack-depth, 0), var(--service-stack-depth-max)) *
+            var(--service-stack-scale-step)
+        )
+      );
+      transform-origin: var(--service-stack-origin, 50% 0);
+    }
+  }
+}
+
 /* Page container: min(1280px, 100% minus both responsive gutters), centred. */
 @utility aksh-container {
   width: calc(100% - 2 * var(--container-gutter));

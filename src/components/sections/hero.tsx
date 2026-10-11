@@ -62,7 +62,7 @@ export function Hero() {
             {/* Eyebrow with Signal Red Dot */}
             <div className="flex items-center gap-8 mb-10 tablet:mb-12">
               <span
-                className="w-6 h-6 rounded-circle bg-signal-red inline-block shrink-0"
+                className="size-(--signal-dot-size) rounded-circle bg-signal-red inline-block shrink-0"
                 aria-hidden="true"
               />
               <span className="font-ui text-eyebrow font-weight-semibold text-warm-stone uppercase tracking-eyebrow">

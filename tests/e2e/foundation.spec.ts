@@ -327,10 +327,13 @@ for (const width of [390, 1440]) {
   });
 }
 
-test("document shell: language, one main landmark, one h1, one h2", async ({ page }) => {
+test("document shell: language, one main landmark, one h1, one h2 per section", async ({ page }) => {
   await open(page, 1024);
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.getByRole("main")).toHaveCount(1);
   await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
-  await expect(page.getByRole("heading", { level: 2 })).toHaveCount(1);
+  await expect(page.getByRole("heading", { level: 2 })).toHaveText([
+    "The Art of Feeling Your Best.",
+    "Thoughtfully Designed Around You.",
+  ]);
 });

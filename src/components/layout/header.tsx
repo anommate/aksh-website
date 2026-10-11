@@ -107,7 +107,7 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen(true)}
                 aria-label="Open navigation menu"
                 aria-expanded={isMobileMenuOpen}
-                className="inline-flex items-center justify-center w-44 h-44 rounded-panel text-soft-charcoal hover:text-logo-black hover:bg-warm-stone/40 transition-colors focus-visible:outline-none cursor-pointer"
+                className="inline-flex items-center justify-center w-44 h-44 rounded-panel text-soft-charcoal hover:text-logo-black hover:bg-warm-stone/40 transition-colors cursor-pointer"
               >
                 <svg
                   className="w-20 h-20"
@@ -169,7 +169,7 @@ export function Header() {
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Open navigation menu"
               aria-expanded={isMobileMenuOpen}
-              className="inline-flex items-center justify-center w-44 h-44 rounded-panel text-soft-charcoal hover:text-logo-black hover:bg-warm-stone/40 transition-colors focus-visible:outline-none cursor-pointer"
+              className="inline-flex items-center justify-center w-44 h-44 rounded-panel text-soft-charcoal hover:text-logo-black hover:bg-warm-stone/40 transition-colors cursor-pointer"
             >
               <svg
                 className="w-20 h-20"

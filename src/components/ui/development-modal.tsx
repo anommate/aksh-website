@@ -123,7 +123,10 @@ export function DevelopmentNoticeProvider({ children }: DevelopmentNoticeProvide
           >
             {/* Header Badge */}
             <div className="flex items-center gap-8 mb-16">
-              <span className="w-6 h-6 rounded-circle bg-signal-red inline-block" />
+              <span
+                className="size-(--signal-dot-size) rounded-circle bg-signal-red inline-block shrink-0"
+                aria-hidden="true"
+              />
               <span className="font-ui text-eyebrow font-weight-semibold uppercase tracking-eyebrow text-muted-text">
                 Development Preview
               </span>
@@ -139,19 +142,12 @@ export function DevelopmentNoticeProvider({ children }: DevelopmentNoticeProvide
 
             {/* Description */}
             <div id="dev-modal-desc" className="font-body text-body-small text-soft-charcoal space-y-12 mb-28">
-              <p>
-                In accordance with Step 4A of the development plan, only the header and hero
-                components are currently implemented.
-              </p>
+              <p>This destination is still in development and is not available yet.</p>
               {destination.path && (
                 <p className="font-mono text-xs bg-warm-stone/50 px-12 py-8 rounded-panel border border-warm-stone">
                   Route destination: <span className="font-bold">{destination.path}</span>
                 </p>
               )}
-              <p className="text-muted-text">
-                Full page content, service catalogues, and the consultation enquiry workflow are
-                scheduled for implementation in subsequent milestones (Milestones 3 and 4).
-              </p>
               <div className="p-12 rounded-panel bg-warm-stone/30 border border-warm-stone text-xs text-soft-charcoal">
                 <span className="font-semibold">Note on appointments:</span> No appointment has been
                 confirmed or scheduled.

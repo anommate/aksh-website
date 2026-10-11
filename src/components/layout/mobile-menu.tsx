@@ -113,7 +113,7 @@ export function MobileMenu({ isOpen, onClose, triggerRef }: MobileMenuProps) {
             type="button"
             onClick={handleClose}
             aria-label="Close navigation menu"
-            className="inline-flex items-center justify-center w-44 h-44 rounded-panel text-soft-charcoal hover:text-logo-black hover:bg-warm-stone/50 transition-colors focus-visible:outline-none cursor-pointer"
+            className="inline-flex items-center justify-center w-44 h-44 rounded-panel text-soft-charcoal hover:text-logo-black hover:bg-warm-stone/50 transition-colors cursor-pointer"
           >
             <svg
               className="w-20 h-20"

@@ -240,6 +240,24 @@
   --form-row-gap: var(--spacing-24);
   --header-height: var(--spacing-80);
 
+  /*
+   * Homepage service card stack. Gap: clearance below the header. Step: how
+   * much lower each stuck card sits, leaving the covered card's top edge
+   * visible. Bottom: clearance above the viewport bottom. Scale step and depth
+   * max: a covered card recedes by the scale step for each card above it, up
+   * to depth max cards. Tall: 1 lets cards taller than the visible area stack
+   * by pinning their bottom edge; 0 keeps them in normal flow. Min window: the
+   * smallest visible stacking height (viewport minus header, gap and bottom)
+   * at which tall cards stack; shorter viewports keep normal flow.
+   */
+  --service-stack-gap: var(--spacing-24);
+  --service-stack-step: var(--spacing-12);
+  --service-stack-bottom: var(--service-stack-gap);
+  --service-stack-scale-step: 0.025;
+  --service-stack-depth-max: 3;
+  --service-stack-tall: 0;
+  --service-stack-min-window: 400px;
+
   /* Controls. The 15px and 13px button insets are border-adjusted exceptions. */
   --control-min-height: var(--spacing-52);
   --button-padding-block: 15px;
@@ -265,6 +283,12 @@
   --space-article-heading-after: var(--spacing-16);
   --space-list-item: var(--spacing-8);
   --space-caption-media: var(--spacing-12);
+
+  /* Decorative signal dot (design spec: 6px default, 8px maximum). */
+  --signal-dot-size: 6px;
+
+  /* Section masthead artwork: about 440px wide, never above 480px. */
+  --masthead-artwork-width: 440px;
 
   /* Borders and focus. */
   --border-width: 1px;
@@ -360,6 +384,22 @@
     --space-article-heading-before: var(--spacing-32);
     --space-article-heading-after: var(--spacing-12);
     --space-caption-media: var(--spacing-8);
+  }
+}
+
+/*
+ * Tablet and mobile service stack: a smaller step and header gap, covered
+ * cards recede to 0.95, tall cards may pin by their bottom edge, and pinned
+ * cards keep the band's own inset below them.
+ */
+@media (width < theme(--breakpoint-desktop)) {
+  :root {
+    --service-stack-gap: var(--spacing-12);
+    --service-stack-step: var(--spacing-8);
+    --service-stack-bottom: var(--section-band-inset);
+    --service-stack-scale-step: 0.05;
+    --service-stack-depth-max: 1;
+    --service-stack-tall: 1;
   }
 }
 
