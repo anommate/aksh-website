@@ -10,10 +10,15 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:capture": "playwright test --config playwright.capture.config.ts",
     "validate:content": "node scripts/not-implemented.mjs validate:content",
     "validate:release": "node scripts/not-implemented.mjs validate:release"
   },
   "dependencies": {
+    "@radix-ui/react-accordion": "1.2.20",
+    "lottie-web": "5.13.0",
+    "lucide-react": "1.48.0",
+    "motion": "14.1.0",
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",

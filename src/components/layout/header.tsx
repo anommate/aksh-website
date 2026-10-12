@@ -35,12 +35,12 @@ export function Header() {
               aria-label="Main navigation left"
               className="flex items-center gap-28 justify-self-start"
             >
-              <a
-                href="#about-aksh"
+              <Link
+                href="/#about-aksh"
                 className="inline-flex items-center min-h-44 px-4 font-ui text-nav font-weight-medium text-soft-charcoal hover:text-logo-black transition-colors cursor-pointer"
               >
                 About AKSH
-              </a>
+              </Link>
               <button
                 type="button"
                 onClick={(e) => handleNavClick(e, "Treatments Directory", "/treatments")}
@@ -48,13 +48,12 @@ export function Header() {
               >
                 Treatments
               </button>
-              <button
-                type="button"
-                onClick={(e) => handleNavClick(e, "Our Experience", "/how-it-works")}
+              <Link
+                href="/#experience"
                 className="inline-flex items-center min-h-44 px-4 font-ui text-nav font-weight-medium text-soft-charcoal hover:text-logo-black transition-colors cursor-pointer"
               >
                 Our Experience
-              </button>
+              </Link>
             </nav>
 
             {/* Centered Logo Artwork */}

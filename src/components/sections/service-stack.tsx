@@ -214,11 +214,18 @@ export function ServiceStack({
     const measure = () => {
       // Measuring briefly returns cards to normal flow, which can shorten the
       // page and clamp the scroll position; restore it before the next paint.
+      // When the view starts below the stack (a link to a later section such
+      // as /#experience, or reading on), keep that content in place instead,
+      // so a change in the stack's height does not move it.
       const scrollY = window.scrollY;
+      const bottomBefore = list.getBoundingClientRect().bottom;
       measureStack();
       measuredWidth = document.documentElement.clientWidth;
       measuredViewport = stableViewportHeight();
-      if (window.scrollY !== scrollY) window.scrollTo({ top: scrollY, behavior: "instant" });
+      const viewBelowStack = bottomBefore <= (layout?.visibleTop ?? 0);
+      const growth = list.getBoundingClientRect().bottom + window.scrollY - (bottomBefore + scrollY);
+      const target = viewBelowStack ? scrollY + growth : scrollY;
+      if (window.scrollY !== target) window.scrollTo({ top: target, behavior: "instant" });
     };
 
     const schedule = (task: () => void) => {

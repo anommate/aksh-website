@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" aria-hidden="true" focusable="false">
+  <!-- A folder opening to reveal a document. Original AKSH artwork; settled frame (end of the reveal) of 03-wellness-docket.json. -->
+  <path d="M24 46 L58 46 L66 56 L136 56 L136 124 L24 124 L24 46 Z" fill="#E4DED3"/>
+  <path d="M24 46 L58 46 L66 56 L136 56 L136 124 L24 124 L24 46 Z" fill="none" stroke="#282826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="46" y="28" width="68" height="74" rx="6" fill="#F9F8F4" stroke="#282826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="56" y="40" width="44" height="6" rx="3" fill="#E4DED3"/>
+  <rect x="56" y="52" width="48" height="6" rx="3" fill="#E4DED3"/>
+  <path d="M58 68 L65 75 L80 60" fill="none" stroke="#FF0000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22 80 L138 80 L136 124 L24 124 L22 80 Z" fill="#F9F8F4"/>
+  <path d="M22 80 L138 80 L136 124 L24 124 L22 80 Z" fill="none" stroke="#282826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

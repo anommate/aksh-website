@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { useDevelopmentNotice } from "@/components/ui/development-modal";
@@ -137,13 +138,13 @@ export function MobileMenu({ isOpen, onClose, triggerRef }: MobileMenuProps) {
           className="flex-1 px-20 py-24 flex flex-col justify-between"
         >
           <div className="space-y-8">
-            <a
-              href="#about-aksh"
+            <Link
+              href="/#about-aksh"
               onClick={handleClose}
               className="w-full flex items-center min-h-52 px-12 py-12 rounded-panel font-ui text-nav font-weight-medium text-soft-charcoal hover:text-logo-black hover:bg-warm-stone/40 transition-colors text-left cursor-pointer"
             >
               About AKSH
-            </a>
+            </Link>
 
             <div className="pt-4 pb-4">
               <button
@@ -197,13 +198,13 @@ export function MobileMenu({ isOpen, onClose, triggerRef }: MobileMenuProps) {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => handleNavClick("Our Experience", "/how-it-works")}
+            <Link
+              href="/#experience"
+              onClick={handleClose}
               className="w-full flex items-center min-h-52 px-12 py-12 rounded-panel font-ui text-nav font-weight-medium text-soft-charcoal hover:text-logo-black hover:bg-warm-stone/40 transition-colors text-left cursor-pointer"
             >
               Our Experience
-            </button>
+            </Link>
 
             <button
               type="button"

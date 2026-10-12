@@ -26,6 +26,8 @@
   /* Breakpoints: mobile is the unprefixed base, below 768px. */
   --breakpoint-tablet: 768px;
   --breakpoint-desktop: 1024px;
+  /* Content fit for rows of five cards (journey timeline): ~210px+ each. */
+  --breakpoint-wide: 1280px;
 
   /* Brand palette: exact values from the latest moodboard. */
   --color-logo-black: #000000;
@@ -190,6 +192,10 @@
   --radius-navigation: 0px;
   --radius-overlay: 16px;
   --radius-status: 0px;
+  /* Testimonial cards: 20px, 16px on mobile. */
+  --radius-quote-card: 20px;
+  /* FAQ chat bubbles: the one tighter "tail" corner where question and answer meet. */
+  --radius-bubble-tail: 4px;
 
   /* Elevation is zero: cards and editorial surfaces have no cast shadow. */
   --shadow-card: none;
@@ -263,9 +269,10 @@
 
   /* Controls. The 15px and 13px button insets are border-adjusted exceptions. */
   --control-min-height: var(--spacing-52);
+  /* Smallest interactive target (design spec: chips, tabs, close buttons). */
+  --target-min-size: 44px;
   --button-padding-block: 15px;
   --button-padding-inline: var(--spacing-24);
-  --target-min-size: 44px;
 
   /* Maximum line lengths (not fixed widths). */
   --measure-hero: 12ch;
@@ -292,6 +299,23 @@
 
   /* Section masthead artwork: about 440px wide, never above 480px. */
   --masthead-artwork-width: 440px;
+  /* The AKSH Experience wordmark: up to 640px wide (so the section fits one desktop view), the container width below. */
+  --experience-masthead-width: 640px;
+
+  /* Client Experiences lettering: up to 800px wide, the container width below. */
+  --testimonials-masthead-width: 800px;
+  /* Testimonials: the window the scrolling columns move through, and the soft fade at its top and bottom edges. */
+  --testimonials-viewport-height: min(720px, 80svh);
+  --testimonials-fade: var(--spacing-48);
+
+  /* FAQ: the accordion column, and how far each answer bubble sits in from its question. */
+  --faq-width: 880px;
+  /* FAQ lettering (the H2): up to 960px wide, the container width below. */
+  --faq-masthead-width: 960px;
+  --faq-answer-indent: var(--spacing-48);
+
+  /* Portrait photographs in single-column layouts (tablet/mobile). */
+  --portrait-max-width: 440px;
 
   /* Borders and focus. */
   --border-width: 1px;
@@ -325,6 +349,8 @@
     --grid-columns: 8;
     --section-gap: var(--spacing-72);
     --section-band-inset: var(--spacing-48);
+    --testimonials-viewport-height: min(680px, 80svh);
+    --faq-answer-indent: var(--spacing-32);
     --page-inset: var(--spacing-48);
     --card-padding: var(--spacing-24);
     --media-column-gap: var(--spacing-40);
@@ -377,6 +403,10 @@
     --radius-image: 20px;
     --radius-panel: 12px;
     --radius-overlay: 12px;
+    --radius-quote-card: 16px;
+    --testimonials-viewport-height: min(560px, 80svh);
+    --testimonials-fade: var(--spacing-32);
+    --faq-answer-indent: var(--spacing-16);
 
     --space-eyebrow-heading: var(--spacing-8);
     --space-title-lead: var(--spacing-20);

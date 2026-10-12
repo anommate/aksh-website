@@ -37,7 +37,7 @@ AKSH/
 │   ├── components/layout/    Skip link and page container
 │   ├── lib/config/           Validated server configuration
 │   └── styles/               Design tokens and font loading
-├── tests/                    Vitest unit tests and Playwright browser checks
+├── tests/                    Vitest unit tests (unit/), Playwright checks (e2e/), manual captures (capture/)
 ├── docs/
 │   ├── adr/                  Architecture decision records
 │   ├── requirements/         Canonical PRD and technical requirements
@@ -67,6 +67,19 @@ pnpm lint
 pnpm typecheck
 pnpm test         # unit tests
 pnpm build && pnpm test:e2e             # browser checks against the production build
+pnpm build && pnpm test:capture         # manual screenshots and videos (writes files; see below)
 ```
 
-If Playwright's Chromium download fails, run the browser checks in an installed browser with `PLAYWRIGHT_CHROMIUM_CHANNEL=chrome` (or `msedge`). `pnpm validate:content` and `pnpm validate:release` fail on purpose until Milestones 3 and 6.
+If Playwright's Chromium download fails, run the browser checks in an installed browser with `PLAYWRIGHT_CHROMIUM_CHANNEL=chrome` (or `msedge`).
+
+### Manual captures
+
+`pnpm test:e2e` runs only the functional checks in `tests/e2e` and writes nothing outside the git-ignored `test-results/`. Screenshots and recordings are separate: `pnpm test:capture` runs `tests/capture/*.capture.ts` (`playwright.capture.config.ts`). Each run writes to a new folder and refuses one that already exists, so earlier captures are never overwritten:
+
+| Run | Output |
+|---|---|
+| `pnpm test:capture` | `captures/<UTC timestamp>/` (git-ignored) |
+| `CAPTURE_NAME=<name> pnpm test:capture` | `captures/<name>/` (git-ignored) |
+| `CAPTURE_DIR=docs/audit/screenshots/<new-name> pnpm test:capture` | that folder, to keep as an audit record; it must be inside the repository |
+
+Add `--grep <text>` to run some captures only, for example `--grep "Experience|record"`. In PowerShell set the variable first: `$env:CAPTURE_NAME = "<name>"; pnpm test:capture`. Playwright's own working files go to `captures/.playwright/`. The video recordings need Playwright's ffmpeg (`pnpm exec playwright install ffmpeg`, once); without it they are skipped and the screenshots still run. `pnpm validate:content` and `pnpm validate:release` fail on purpose until Milestones 3 and 6.

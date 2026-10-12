@@ -143,6 +143,123 @@
   }
 }
 
+/*
+ * Journey timeline (src/components/experience/journey.tsx). Below the wide
+ * breakpoint the steps form a vertical timeline: a rail in the list's left
+ * inset with a red dot level with each step number. At wide widths five cards
+ * share one row under a horizontal rail with a dot above each card. Each step
+ * draws the rail segment from its own dot to the next, behind the dots and
+ * clear of the cards and their text.
+ */
+@layer components {
+  [data-journey] {
+    --journey-inset: var(--spacing-32);
+    /* Level with the step number: card border + card padding + half its line. */
+    --journey-dot-centre: calc(var(--border-width) + var(--card-padding) + var(--leading-label) / 2);
+    display: grid;
+    gap: var(--grid-gap);
+  }
+
+  [data-journey-step] {
+    position: relative;
+    padding-left: var(--journey-inset);
+  }
+
+  [data-journey-dot] {
+    position: absolute;
+    left: calc(var(--journey-inset) / 2 - var(--signal-dot-size) / 2);
+    top: calc(var(--journey-dot-centre) - var(--signal-dot-size) / 2);
+  }
+
+  [data-journey-step]:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--journey-inset) / 2 - var(--border-width) / 2);
+    top: var(--journey-dot-centre);
+    height: calc(100% + var(--grid-gap));
+    border-left: var(--border-width) solid var(--color-soft-charcoal);
+  }
+
+  @media (width >= theme(--breakpoint-wide)) {
+    [data-journey] {
+      /* Compact: a 24px band above the cards holds the rail and dots. */
+      --journey-inset: var(--spacing-24);
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    [data-journey-step] {
+      padding-left: 0;
+      padding-top: var(--journey-inset);
+    }
+
+    [data-journey-dot] {
+      left: calc(50% - var(--signal-dot-size) / 2);
+      top: 0;
+    }
+
+    [data-journey-step]:not(:last-child)::before {
+      left: 50%;
+      top: calc(var(--signal-dot-size) / 2 - var(--border-width) / 2);
+      width: calc(100% + var(--grid-gap));
+      height: 0;
+      border-left: 0;
+      border-top: var(--border-width) solid var(--color-soft-charcoal);
+    }
+  }
+}
+
+/*
+ * Journey illustrations (src/components/experience/journey-illustration.tsx).
+ * The static SVG shows until a Lottie animation has started; a paused one
+ * keeps its current frame. The static SVG always shows under reduced motion,
+ * without JavaScript, or when loading fails.
+ */
+@layer components {
+  [data-journey-illustration] [data-poster] {
+    transition: opacity var(--duration-standard) var(--ease-standard);
+  }
+
+  [data-journey-illustration] [data-lottie] {
+    opacity: 0;
+  }
+
+  [data-journey-illustration]:is([data-state="playing"], [data-state="paused"]) [data-poster] {
+    opacity: 0;
+  }
+
+  [data-journey-illustration]:is([data-state="playing"], [data-state="paused"]) [data-lottie] {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-journey-illustration][data-state] [data-poster] {
+      opacity: 1;
+    }
+
+    [data-journey-illustration][data-state] [data-lottie] {
+      opacity: 0;
+    }
+  }
+}
+
+/*
+ * Testimonial columns (src/components/sections/testimonials-scroller.tsx).
+ * The window fades its top and bottom edges into the page; the fade is a
+ * mask, so whatever lies behind (the ivory page) shows through. The pause
+ * control sits outside the window, clear of the fade.
+ */
+@layer components {
+  [data-testimonials-viewport] {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black var(--testimonials-fade),
+      black calc(100% - var(--testimonials-fade)),
+      transparent
+    );
+  }
+}
+
 /* Page container: min(1280px, 100% minus both responsive gutters), centred. */
 @utility aksh-container {
   width: calc(100% - 2 * var(--container-gutter));

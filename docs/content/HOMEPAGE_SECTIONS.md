@@ -30,3 +30,7 @@ Two sources describe the homepage. Neither overrides the other until the owner d
 
 - Build the PRD sections first (Milestone 3). Implement proposal-only sections (04, 05, 10, 12) as content-gated components that render nothing unless approved content exists. No empty shells are shown in production.
 - Section headings in the proposal are draft copy, not approved wording.
+
+## Current build order
+
+Hero → About AKSH (`#about-aksh`) → Our Services (`#services`) → Meet Our Consultant (`#meet-our-consultant`) → The AKSH Experience (`#experience`) → Client Experiences (`#client-experiences`, fictional labelled samples in development/preview only; omitted in production; row 10 above) → FAQ (`#faq`, owner-supplied, every mode; directly after The AKSH Experience in production). The AKSH Experience is the owner-supplied version of row 07 (PRD §7.1 item 6); header "Our Experience" links to it, and the former `/experience` route redirects there (307).

@@ -24,6 +24,8 @@ build/
 coverage/
 playwright-report/
 test-results/
+# Manual captures (`pnpm test:capture`); keep a set in docs/audit/screenshots/<new folder>
+captures/
 *.tsbuildinfo
 next-env.d.ts
 

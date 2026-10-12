@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  async redirects() {
+    return [
+      // The AKSH Experience moved from its own page to a homepage section.
+      // Temporary (307) so browsers do not cache it while the route plan settles.
+      { source: "/experience", destination: "/#experience", permanent: false },
+    ];
+  },
   turbopack: {
     rules: {
       "*.css": {

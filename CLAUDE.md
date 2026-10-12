@@ -49,7 +49,8 @@ Local setup: copy `.env.example` to `.env.local` and set `APP_MODE=development`.
 | `pnpm lint` | Direct ESLint |
 | `pnpm typecheck` | `next typegen && tsc --noEmit` |
 | `pnpm test` | Vitest unit tests (`tests/unit`) |
-| `pnpm test:e2e` | Playwright against the production build: run `pnpm build` first. Where Playwright's Chromium cannot be downloaded, set `PLAYWRIGHT_CHROMIUM_CHANNEL=chrome` |
+| `pnpm test:e2e` | Playwright against the production build: run `pnpm build` first. Where Playwright's Chromium cannot be downloaded, set `PLAYWRIGHT_CHROMIUM_CHANNEL=chrome`. Functional checks only (`tests/e2e`); they write no files outside `test-results/` |
+| `pnpm test:capture` | Manual screenshots/videos (`tests/capture/*.capture.ts`) into a new folder: `captures/<timestamp>/` (git-ignored), `CAPTURE_NAME=<name>` for `captures/<name>/`, or `CAPTURE_DIR=docs/audit/screenshots/<new-name>` to keep. Refuses existing folders; never write captures elsewhere |
 | `pnpm validate:content` / `pnpm validate:release` | Fail on purpose until Milestones 3 and 6 |
 
 ## Content rules

@@ -166,6 +166,49 @@ async function unreachableContent(page: Page) {
   });
 }
 
+// Height of the end-of-page spacer inside the stack (0 when there is none).
+async function stackSpacer(page: Page) {
+  return stack(page).evaluate((list) => {
+    const spacer = getComputedStyle(list, "::after");
+    return spacer.content === "none" ? 0 : Number.parseFloat(spacer.height);
+  });
+}
+
+// Scrolls to the exact point where card 04's natural top reaches its sticky
+// top: the moment the whole stack has settled, just before it leaves.
+async function scrollToSettlePoint(page: Page) {
+  await stack(page).evaluate((list) => {
+    const cards = [...list.children] as HTMLElement[];
+    const gap = Number.parseFloat(getComputedStyle(list).rowGap);
+    const naturalTop =
+      list.getBoundingClientRect().top +
+      cards.slice(0, 3).reduce((sum, card) => sum + card.getBoundingClientRect().height + gap, 0);
+    const stickyTop = Number.parseFloat(getComputedStyle(cards[3]).top);
+    window.scrollBy({ top: naturalTop - stickyTop, behavior: "instant" });
+  });
+  await settle(page);
+}
+
+// Distance from card 04's bottom to the top of the consultant section.
+async function gapBelowStack(page: Page) {
+  return page.evaluate(() => {
+    const last = document.querySelector("[data-service-stack-item]:last-child")!;
+    const next = document.querySelector("#meet-our-consultant")!;
+    return Math.round(next.getBoundingClientRect().top - last.getBoundingClientRect().bottom);
+  });
+}
+
+// No stuck or leaving card ever reaches into the consultant section.
+async function expectStackClearOfConsultant(page: Page) {
+  const { bottoms, next } = await page.evaluate(() => ({
+    bottoms: [...document.querySelectorAll("[data-service-stack-item]")].map(
+      (item) => item.getBoundingClientRect().bottom
+    ),
+    next: document.querySelector("#meet-our-consultant")!.getBoundingClientRect().top,
+  }));
+  for (const bottom of bottoms) expect(bottom).toBeLessThanOrEqual(next);
+}
+
 async function itemTops(page: Page) {
   return items(page).evaluateAll((elements) =>
     elements.map((element) => element.getBoundingClientRect().top)
@@ -374,8 +417,9 @@ test.describe("desktop card stack", () => {
     let previousTops = await itemTops(page);
     let previousY = start;
     let sawOverlap = false;
+    // Up to 80 wheel steps: from Services to the end of the homepage (which grows as sections are added).
 
-    for (let step = 0; step < 40 && previousY < maxScroll; step++) {
+    for (let step = 0; step < 80 && previousY < maxScroll; step++) {
       await page.mouse.wheel(0, 120);
       await settle(page);
       const y = await page.evaluate(() => window.scrollY);
@@ -399,7 +443,7 @@ test.describe("desktop card stack", () => {
     expect(sawOverlap).toBe(true);
     expect(previousY).toBe(maxScroll);
 
-    for (let step = 0; step < 40 && previousY > start; step++) {
+    for (let step = 0; step < 80 && previousY > start; step++) {
       await page.mouse.wheel(0, -120);
       await settle(page);
       const y = await page.evaluate(() => window.scrollY);
@@ -414,27 +458,16 @@ test.describe("desktop card stack", () => {
   });
 
   for (const viewport of [{ width: 1440, height: 900 }, { width: 1366, height: 768 }]) {
-    test(`card 04 fully settles on the real page before it ends at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+    test(`card 04 settles, then the stack exits cleanly into the consultant section at ${viewport.width}x${viewport.height}`, async ({ page }) => {
       await open(page, viewport, "/#services");
       const header = await headerBottom(page);
       const stickyTops = [0, 1, 2, 3].map((index) => header + STACK_GAP + index * STACK_STEP);
 
-      // Real wheel scrolling to the end of the page.
-      await page.mouse.move(viewport.width / 2, viewport.height / 2);
-      let y = -1;
-      for (let step = 0; step < 60; step++) {
-        await page.mouse.wheel(0, 240);
-        await settle(page);
-        const next = await page.evaluate(() => window.scrollY);
-        if (next === y) break;
-        y = next;
-      }
-      const atEnd = await page.evaluate(
-        () => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
-      );
-      expect(atEnd).toBe(true);
+      // A real section follows, so no end-of-page spacer is added.
+      expect(await stackSpacer(page)).toBe(0);
 
-      // Every card rests at its sticky offset: the stack is complete.
+      // At the settle point every card rests at its sticky offset.
+      await scrollToSettlePoint(page);
       for (const [index, top] of (await itemTops(page)).entries()) {
         expect(Math.abs(top - stickyTops[index])).toBeLessThanOrEqual(0.5);
       }
@@ -443,33 +476,35 @@ test.describe("desktop card stack", () => {
       );
       expect(depth).toBeCloseTo(3, 3);
       expect(await isUnobscured(page.getByRole("button", { name: "Explore Skin" }))).toBe(true);
+      // Only the band's inset and the section gap separate card 04 from the
+      // consultant section: no extra blank band.
+      expect(await gapBelowStack(page)).toBe(64 + 90);
 
-      // The trailing space lives inside the stack and is only what is needed:
-      // at the page end, card 04's natural position is exactly its sticky top.
-      const tail = await stack(page).evaluate((list) => {
-        const last = list.lastElementChild!.getBoundingClientRect();
-        const gap = Number.parseFloat(getComputedStyle(list).rowGap);
-        return {
-          spacer: Number.parseFloat(getComputedStyle(list, "::after").height),
-          naturalTop: list.getBoundingClientRect().top + 3 * (last.height + gap),
-        };
-      });
-      expect(tail.spacer).toBeGreaterThan(0);
-      expect(tail.naturalTop).toBeLessThanOrEqual(stickyTops[3] + 0.5);
-      expect(tail.naturalTop).toBeGreaterThanOrEqual(stickyTops[3] - 2);
-
-      // Cards never extend beyond the Services section.
-      const bounds = await page.locator("section#services").evaluate((section) => {
-        const rect = section.getBoundingClientRect();
-        const cards = [...section.querySelectorAll("[data-service-stack-item]")].map((item) =>
-          item.getBoundingClientRect()
+      // Real wheel scrolling: the last card moves 1:1 with the page, the
+      // covered cards fold in behind it, and no card covers the next section.
+      await page.mouse.move(viewport.width / 2, viewport.height / 2);
+      let previousLastTop = stickyTops[3];
+      for (let step = 0; step < 20; step++) {
+        await page.mouse.wheel(0, 120);
+        await settle(page);
+        const tops = await itemTops(page);
+        expect(Math.abs(previousLastTop - tops[3] - 120)).toBeLessThanOrEqual(0.5);
+        previousLastTop = tops[3];
+        for (const [index, top] of tops.entries()) {
+          if (index > 0) expect(top).toBeGreaterThanOrEqual(tops[index - 1] - 0.5);
+          expect(top).toBeLessThanOrEqual(tops[3] + 0.5);
+        }
+        await expectStackClearOfConsultant(page);
+        const bottoms = await items(page).evaluateAll((elements) =>
+          elements.map((element) => element.getBoundingClientRect().bottom)
         );
-        return { top: rect.top, bottom: rect.bottom, cards: cards.map((c) => [c.top, c.bottom]) };
-      });
-      for (const [top, bottom] of bounds.cards) {
-        expect(top).toBeGreaterThanOrEqual(bounds.top);
-        expect(bottom).toBeLessThanOrEqual(bounds.bottom);
+        if (bottoms[3] < header) break;
       }
+      const bottoms = await items(page).evaluateAll((elements) =>
+        elements.map((element) => element.getBoundingClientRect().bottom)
+      );
+      for (const bottom of bottoms) expect(bottom).toBeLessThan(header);
+      await expect(page.getByRole("heading", { level: 2, name: "Dr. Priyanka Masharkar" })).toBeInViewport();
     });
   }
 
@@ -496,12 +531,12 @@ test.describe("keyboard focus", () => {
     test(`exposes each covered card and its CTA at ${viewport.width}x${viewport.height}`, async ({ page }) => {
       await open(page, viewport);
       await expect(stack(page)).toHaveAttribute("data-stack", "on");
-      await expectKeyboardExposure(page, viewport);
+      await expectKeyboardExposure(page);
     });
   }
 });
 
-async function expectKeyboardExposure(page: Page, viewport: Viewport) {
+async function expectKeyboardExposure(page: Page) {
   await page.getByRole("button", { name: "Discover AKSH" }).focus();
 
   for (const category of categories) {
@@ -513,10 +548,8 @@ async function expectKeyboardExposure(page: Page, viewport: Viewport) {
     expect(await cta.evaluate((e) => getComputedStyle(e).outlineStyle)).toBe("solid");
   }
 
-  // At the end of the page, earlier CTAs sit beneath later cards.
-  await page.mouse.move(viewport.width / 2, viewport.height / 2);
-  for (let i = 0; i < 10; i++) await page.mouse.wheel(0, 1000);
-  await settle(page);
+  // At the settle point, earlier CTAs sit beneath later cards.
+  await scrollToSettlePoint(page);
   for (const category of categories.slice(0, 3).reverse()) {
     const cta = page.getByRole("button", { name: category.cta.label });
     expect(await isUnobscured(cta)).toBe(false);
@@ -544,11 +577,11 @@ async function expectKeyboardExposure(page: Page, viewport: Viewport) {
 
 const MOBILE_STACK_VIEWPORTS = [
   // Standard phone: card 04 is extended so its bottom rests on the pin line.
-  { width: 390, height: 844, restsOnPinLine: true },
-  { width: 360, height: 800, restsOnPinLine: true },
-  { width: 320, height: 568, restsOnPinLine: true },
+  { width: 390, height: 844, restsOnPinLine: true, gapBelow: 32 + 56 },
+  { width: 360, height: 800, restsOnPinLine: true, gapBelow: 32 + 56 },
+  { width: 320, height: 568, restsOnPinLine: true, gapBelow: 32 + 56 },
   // Tablet portrait: every card fits, so the stack settles at the top.
-  { width: 768, height: 1024, restsOnPinLine: false },
+  { width: 768, height: 1024, restsOnPinLine: false, gapBelow: 48 + 72 },
 ];
 
 test.describe("tablet and mobile card stack", () => {
@@ -589,38 +622,43 @@ test.describe("tablet and mobile card stack", () => {
       expect(await unreachableContent(page)).toEqual([]);
     });
 
-    test(`card 04 settles on the real page after momentum flicks at ${size}`, async ({ page }) => {
+    test(`card 04 settles, then the stack hands over cleanly to the consultant section at ${size}`, async ({ page }) => {
       await open(page, viewport, "/#services");
       await expect(stack(page)).toHaveAttribute("data-stack", "on");
-      const low = viewport.height - 120;
-      const high = Math.max(120, low - 360);
-      let previous = -1;
-      for (let flick = 0; flick < 30; flick++) {
-        await touchDrag(page, low, high, "flick");
-        const samples = await waitForScrollRest(page);
-        const now = samples[samples.length - 1];
-        if (now === previous) break;
-        previous = now;
-      }
-      const atEnd = await page.evaluate(
-        () => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
-      );
-      expect(atEnd).toBe(true);
+      // A real section follows, so no end-of-page spacer is added.
+      expect(await stackSpacer(page)).toBe(0);
 
-      const { cards, pinLine, bottom, viewport: height, listTop, rowGap } = await stackGeometry(page);
-      // Every card rests at its own sticky top: the stack is complete.
+      // At the settle point every card rests at its own sticky top.
+      await scrollToSettlePoint(page);
+      const { cards, pinLine } = await stackGeometry(page);
       for (const card of cards) expect(Math.abs(card.rectTop - card.top)).toBeLessThanOrEqual(0.5);
-      const last = cards[3];
-      expect(last.rectBottom).toBeLessThanOrEqual(pinLine + 1);
+      expect(cards[3].rectBottom).toBeLessThanOrEqual(pinLine + 1);
+      if (viewport.restsOnPinLine) expect(Math.abs(cards[3].rectBottom - pinLine)).toBeLessThanOrEqual(1);
       expect(await isUnobscured(page.getByRole("button", { name: "Explore Skin" }))).toBe(true);
-      // The trailing space is only what card 04 needs to reach its sticky top.
-      const naturalTop = listTop + cards.slice(0, 3).reduce((sum, card) => sum + card.height + rowGap, 0);
-      expect(naturalTop).toBeLessThanOrEqual(last.top + 0.5);
-      expect(naturalTop).toBeGreaterThanOrEqual(last.top - 2);
-      if (viewport.restsOnPinLine) {
-        // No empty band below the stack beyond the band's own inset.
-        expect(height - last.rectBottom).toBeLessThanOrEqual(bottom + 2);
+      // Only the band's inset and the section gap lie between card 04 and the
+      // consultant section: no extra blank band.
+      expect(await gapBelowStack(page)).toBe(viewport.gapBelow);
+
+      // A momentum flick, then slow swipes onwards: the stack leaves and no
+      // card ever reaches into the consultant section.
+      const low = viewport.height - 120;
+      const high = Math.max(140, low - 300);
+      await touchDrag(page, low, low - 200, "flick");
+      await waitForScrollRest(page);
+      await expectStackClearOfConsultant(page);
+      // If momentum carried past the section, come back to just above it.
+      await page.evaluate(() => {
+        const next = document.querySelector("#meet-our-consultant")!.getBoundingClientRect().top;
+        if (next < 0) window.scrollBy({ top: next - window.innerHeight, behavior: "instant" });
+      });
+      for (let swipe = 0; swipe < 30; swipe++) {
+        const top = await page.locator("#meet-our-consultant").evaluate((s) => s.getBoundingClientRect().top);
+        if (top < viewport.height * 0.6) break;
+        await touchDrag(page, low, high, "swipe");
+        await waitForScrollRest(page);
+        await expectStackClearOfConsultant(page);
       }
+      await expect(page.getByRole("heading", { level: 2, name: "Dr. Priyanka Masharkar" })).toBeInViewport();
     });
 
     test(`slow swipes, momentum flicks and reversal stay native at ${size}`, async ({ page }) => {

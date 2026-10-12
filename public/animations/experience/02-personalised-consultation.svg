@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" aria-hidden="true" focusable="false">
+  <!-- Two conversation bubbles. Original AKSH artwork; settled frame (end of the reveal) of 02-personalised-consultation.json. -->
+  <rect x="22" y="30" width="82" height="56" rx="16" fill="none" stroke="#282826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M36 83 L50 83 L32 100 L36 83 Z" fill="#F9F8F4"/>
+  <path d="M38 86 L32 100 L50 86" fill="none" stroke="#282826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="36" y="47" width="50" height="7" rx="3.5" fill="#E4DED3"/>
+  <rect x="36" y="61" width="34" height="7" rx="3.5" fill="#E4DED3"/>
+  <rect x="58" y="68" width="82" height="54" rx="16" fill="#F9F8F4" stroke="#282826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M110 119 L124 119 L130 136 L110 119 Z" fill="#F9F8F4"/>
+  <path d="M110 122 L130 136 L124 122" fill="none" stroke="#282826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse cx="78" cy="95" rx="3.5" ry="3.5" fill="#FF0000"/>
+  <rect x="88" y="91" width="36" height="8" rx="4" fill="#E4DED3"/>
+</svg>

@@ -124,9 +124,11 @@ test.describe("Desktop Navigation & Header Layout", () => {
     await open(page, 1440);
     const aboutLink = page.getByRole("link", { name: "About AKSH" });
     await expect(aboutLink).toBeVisible();
-    await expect(aboutLink).toHaveAttribute("href", "#about-aksh");
+    await expect(aboutLink).toHaveAttribute("href", "/#about-aksh");
     await expect(page.getByRole("button", { name: "Treatments", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Our Experience" })).toBeVisible();
+    const experienceLink = page.getByRole("link", { name: "Our Experience" });
+    await expect(experienceLink).toBeVisible();
+    await expect(experienceLink).toHaveAttribute("href", "/#experience");
     await expect(page.getByRole("button", { name: "Journal" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Contact" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Book a Consultation" }).first()).toBeVisible();
@@ -335,5 +337,11 @@ test("document shell: language, one main landmark, one h1, one h2 per section", 
   await expect(page.getByRole("heading", { level: 2 })).toHaveText([
     "The Art of Feeling Your Best.",
     "Thoughtfully Designed Around You.",
+    "Dr. Priyanka Masharkar",
+    "Your Wellness Journey, Simplified.",
+    "The Art of Feeling Good, Through Their Eyes.",
+    // The FAQ heading is lettering artwork: no text, named by its alt text.
+    "",
   ]);
+  await expect(page.getByRole("heading", { level: 2, name: "Frequently Asked Questions", exact: true })).toHaveCount(1);
 });

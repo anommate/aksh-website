@@ -46,7 +46,7 @@ async function expectRing(control: Locator, color?: string) {
 }
 
 test.describe("button focus outline", () => {
-  test("header, hero, About and Services buttons show the 2px outline (1440px)", async ({ page }) => {
+  test("header, hero, About, Services and Experience buttons show the 2px outline (1440px)", async ({ page }) => {
     await open(page, 1440);
     // Keyboard modality first, so programmatic focus is focus-visible.
     await page.keyboard.press("Tab");
@@ -59,6 +59,10 @@ test.describe("button focus outline", () => {
     for (const label of ["Explore Biohacking", "Explore Recovery", "Explore Body Contouring", "Explore Skin"]) {
       await expectRing(page.getByRole("button", { name: label }), BLACK);
     }
+    // Meet Our Consultant has no buttons; The AKSH Experience follows.
+    await expect(page.locator("#meet-our-consultant").getByRole("button")).toHaveCount(0);
+    await expectRing(page.locator("#experience").getByRole("button", { name: "Pause animations" }), BLACK);
+    await expectRing(page.locator("#experience").getByRole("button", { name: "Begin Your Journey" }), BLACK);
   });
 
   test("dialog and mobile menu buttons show the 2px outline (390px)", async ({ page }) => {
@@ -102,10 +106,13 @@ test.describe("decorative signal dots", () => {
   }
 
   for (const width of [1440, 390]) {
-    test(`hero, About, divider, Services and dialog dots are 6x6px (${width}px)`, async ({ page }) => {
+    test(`hero, About, divider, Services, consultant, Experience and dialog dots are 6x6px (${width}px)`, async ({ page }) => {
       await open(page, width, 844);
       const dots = page.locator("main span.bg-signal-red.rounded-circle");
-      await expect(dots).toHaveCount(4);
+      // Five before; The AKSH Experience adds its five timeline dots (its
+      // wordmark artwork carries its own red dot). Client Experiences has
+      // masthead artwork and no dot. The FAQ adds its two eyebrow dots.
+      await expect(dots).toHaveCount(12);
       for (const dot of await dots.all()) await expectDot(dot);
 
       await page.getByRole("button", { name: "Discover AKSH" }).click();

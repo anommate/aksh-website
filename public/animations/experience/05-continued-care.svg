@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" aria-hidden="true" focusable="false">
+  <!-- A headset with a supportive conversation bubble. Original AKSH artwork; settled frame (end of the reveal) of 05-continued-care.json. -->
+  <path d="M38 92 C38 62 56 40 80 40 C104 40 122 62 122 92" fill="none" stroke="#282826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="28" y="86" width="22" height="36" rx="9" fill="#E4DED3" stroke="#282826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="110" y="86" width="22" height="36" rx="9" fill="#E4DED3" stroke="#282826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M39 122 C39 134 51 138 69 138" fill="none" stroke="#282826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse cx="74" cy="138" rx="4.5" ry="4.5" fill="#FF0000"/>
+  <rect x="98" y="18" width="44" height="30" rx="10" fill="#F9F8F4" stroke="#282826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M103 45 L115 45 L100 58 L103 45 Z" fill="#F9F8F4"/>
+  <path d="M106 48 L100 58 L114 48" fill="none" stroke="#282826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse cx="110" cy="33" rx="3" ry="3" fill="#FF0000"/>
+  <rect x="117" y="30" width="16" height="6" rx="3" fill="#E4DED3"/>
+</svg>
