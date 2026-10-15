@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SkipLink } from "@/components/layout/skip-link";
 import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 import { DevelopmentNoticeProvider } from "@/components/ui/development-modal";
 import { cormorantGaramond, manrope } from "@/styles/fonts";
 import "./globals.css";
@@ -30,6 +31,7 @@ export default function RootLayout({
           <main id={MAIN_CONTENT_ID} tabIndex={-1} data-focus-target className="flex-1">
             {children}
           </main>
+          <Footer />
         </DevelopmentNoticeProvider>
       </body>
     </html>

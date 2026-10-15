@@ -314,6 +314,26 @@
   --faq-masthead-width: 960px;
   --faq-answer-indent: var(--spacing-48);
 
+  /*
+   * Footer waves: the band's height above the charcoal body, then each layer,
+   * back to front: charcoal opacity, one seamless loop's duration, and its
+   * starting offset (a negative delay), so the layers never move in step.
+   * The front layer is opaque: it joins the solid footer.
+   */
+  --footer-wave-height: var(--spacing-128);
+  --footer-wave-1-opacity: 0.14;
+  --footer-wave-2-opacity: 0.28;
+  --footer-wave-3-opacity: 0.5;
+  --footer-wave-4-opacity: 1;
+  --footer-wave-1-duration: 16s;
+  --footer-wave-2-duration: 23s;
+  --footer-wave-3-duration: 31s;
+  --footer-wave-4-duration: 42s;
+  --footer-wave-1-delay: -4s;
+  --footer-wave-2-delay: -15s;
+  --footer-wave-3-delay: -9s;
+  --footer-wave-4-delay: -27s;
+
   /* Portrait photographs in single-column layouts (tablet/mobile). */
   --portrait-max-width: 440px;
 
@@ -351,6 +371,7 @@
     --section-band-inset: var(--spacing-48);
     --testimonials-viewport-height: min(680px, 80svh);
     --faq-answer-indent: var(--spacing-32);
+    --footer-wave-height: var(--spacing-96);
     --page-inset: var(--spacing-48);
     --card-padding: var(--spacing-24);
     --media-column-gap: var(--spacing-40);
@@ -407,6 +428,7 @@
     --testimonials-viewport-height: min(560px, 80svh);
     --testimonials-fade: var(--spacing-32);
     --faq-answer-indent: var(--spacing-16);
+    --footer-wave-height: var(--spacing-64);
 
     --space-eyebrow-heading: var(--spacing-8);
     --space-title-lead: var(--spacing-20);

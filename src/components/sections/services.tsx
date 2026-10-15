@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Container } from "@/components/layout/container";
 import { ServiceCard } from "@/components/sections/service-card";
 import { ServiceStack } from "@/components/sections/service-stack";
-import { servicesContent } from "@/content/services";
+import { serviceCardId, servicesContent } from "@/content/services";
 
 /**
  * Homepage Services Section
@@ -66,6 +66,9 @@ export function ServicesSection() {
           {servicesContent.categories.map((category, index) => (
             <li
               key={category.id}
+              // Footer "Our Services" links land here, below the sticky header.
+              id={serviceCardId(category.id)}
+              className="scroll-mt-[calc(var(--header-height)+var(--border-width)+var(--service-stack-gap))]"
               data-service-stack-item
               style={{ "--service-stack-index": index } as CSSProperties}
             >

@@ -144,6 +144,56 @@
 }
 
 /*
+ * Footer waves (src/components/layout/footer-waves.tsx). Four layers of
+ * charcoal at rising opacity, back to front. The server renders the complete,
+ * still waves. Once the client allows motion, each layer drifts left by one
+ * period (--footer-wave-period, set on the SVG) on its own seamless loop, from
+ * its own offset. "paused" holds the current frame. Only the decorative paths
+ * move; under reduced motion they never do.
+ */
+@layer components {
+  @keyframes footer-wave-drift {
+    to {
+      transform: translateX(calc(-1 * var(--footer-wave-period)));
+    }
+  }
+
+  [data-wave-layer="1"] {
+    fill-opacity: var(--footer-wave-1-opacity);
+    --footer-wave-duration: var(--footer-wave-1-duration);
+    --footer-wave-delay: var(--footer-wave-1-delay);
+  }
+
+  [data-wave-layer="2"] {
+    fill-opacity: var(--footer-wave-2-opacity);
+    --footer-wave-duration: var(--footer-wave-2-duration);
+    --footer-wave-delay: var(--footer-wave-2-delay);
+  }
+
+  [data-wave-layer="3"] {
+    fill-opacity: var(--footer-wave-3-opacity);
+    --footer-wave-duration: var(--footer-wave-3-duration);
+    --footer-wave-delay: var(--footer-wave-3-delay);
+  }
+
+  [data-wave-layer="4"] {
+    fill-opacity: var(--footer-wave-4-opacity);
+    --footer-wave-duration: var(--footer-wave-4-duration);
+    --footer-wave-delay: var(--footer-wave-4-delay);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    [data-footer-surface]:is([data-wave-state="playing"], [data-wave-state="paused"]) [data-wave-layer] {
+      animation: footer-wave-drift var(--footer-wave-duration) linear var(--footer-wave-delay) infinite;
+    }
+
+    [data-footer-surface][data-wave-state="paused"] [data-wave-layer] {
+      animation-play-state: paused;
+    }
+  }
+}
+
+/*
  * Journey timeline (src/components/experience/journey.tsx). Below the wide
  * breakpoint the steps form a vertical timeline: a rail in the list's left
  * inset with a red dot level with each step number. At wide widths five cards

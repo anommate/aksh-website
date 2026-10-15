@@ -57,6 +57,9 @@ export interface ServicesSectionContent {
   status: "owner_supplied";
 }
 
+/** Anchor id of a homepage service card (src/components/sections/services.tsx). */
+export const serviceCardId = (id: string) => `service-${id}`;
+
 export const servicesContent: ServicesSectionContent = {
   id: "services",
   // Trimmed display copy of assets/source/brand/our-services-artwork.png:

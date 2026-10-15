@@ -122,7 +122,8 @@ test.describe("Desktop Navigation & Header Layout", () => {
 
   test("desktop header shows split navigation and CTA", async ({ page }) => {
     await open(page, 1440);
-    const aboutLink = page.getByRole("link", { name: "About AKSH" });
+    // The footer repeats About AKSH; this checks the header's.
+    const aboutLink = page.getByRole("banner").getByRole("link", { name: "About AKSH" });
     await expect(aboutLink).toBeVisible();
     await expect(aboutLink).toHaveAttribute("href", "/#about-aksh");
     await expect(page.getByRole("button", { name: "Treatments", exact: true })).toBeVisible();
@@ -334,7 +335,7 @@ test("document shell: language, one main landmark, one h1, one h2 per section", 
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.getByRole("main")).toHaveCount(1);
   await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
-  await expect(page.getByRole("heading", { level: 2 })).toHaveText([
+  await expect(page.getByRole("main").getByRole("heading", { level: 2 })).toHaveText([
     "The Art of Feeling Your Best.",
     "Thoughtfully Designed Around You.",
     "Dr. Priyanka Masharkar",
@@ -344,4 +345,11 @@ test("document shell: language, one main landmark, one h1, one h2 per section", 
     "",
   ]);
   await expect(page.getByRole("heading", { level: 2, name: "Frequently Asked Questions", exact: true })).toHaveCount(1);
+  // The footer's group headings follow, outside main.
+  await expect(page.getByRole("contentinfo").getByRole("heading", { level: 2 })).toHaveText([
+    "Explore",
+    "Our Services",
+    "Visit AKSH",
+    "Connect",
+  ]);
 });

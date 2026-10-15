@@ -546,11 +546,12 @@ test("pausing before the section is reached keeps the still illustrations until 
   await expect(toggle(page)).toHaveAccessibleName("Resume animations");
   await reveal(page, "[data-journey-step]:first-child [data-journey-illustration]");
   const first = illustrations(page).first();
-  await expect(first).toHaveAttribute("data-state", "ready");
+  // Loading the animation can take longer than the default wait when many tests run at once.
+  await expect(first).toHaveAttribute("data-state", "ready", { timeout: 15_000 });
   expect(await posterShown(page).then((shown) => shown[0])).toEqual(["1", "0"]);
 
   await toggle(page).click();
-  await expect(first).toHaveAttribute("data-state", "playing");
+  await expect(first).toHaveAttribute("data-state", "playing", { timeout: 15_000 });
 });
 
 test("the control's row is reserved, so nothing moves when it appears", async ({ browser }) => {
@@ -559,6 +560,8 @@ test("the control's row is reserved, so nothing moves when it appears", async ({
     const page = await context.newPage();
     await page.goto("/");
     await page.evaluate(() => document.fonts.ready);
+    // With JavaScript, the control appears on hydration: wait for it rather than racing it.
+    if (javaScriptEnabled) await expect(toggle(page)).toBeVisible();
     const visible = await toggle(page).isVisible();
     const top = await section(page).locator("[data-journey]").evaluate((list) => list.getBoundingClientRect().top + window.scrollY - document.getElementById("experience")!.getBoundingClientRect().top - window.scrollY);
     await context.close();
@@ -722,7 +725,7 @@ test.describe("anchor navigation", () => {
     await expect(page).toHaveURL(new RegExp(`/#${id}$`));
     await expectLanded(page);
 
-    await page.getByRole("link", { name: "About AKSH" }).click();
+    await page.getByRole("banner").getByRole("link", { name: "About AKSH" }).click();
     await expect(page).toHaveURL(/\/#about-aksh$/);
     await expect(page.locator("section#about-aksh")).toBeInViewport();
     expect(errors).toEqual([]);

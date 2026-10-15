@@ -39,7 +39,8 @@ type StackLayout = {
  *
  * Scrolling stays native: the script never intercepts wheel, touch, or keys.
  * It reads card positions on scroll to let covered cards recede, and scrolls a
- * covered card back into view when it receives keyboard focus. Heights are
+ * covered card back into view when it receives keyboard focus or is the
+ * target of a link (#service-<id>). Heights are
  * measured against the small viewport (100svh), which stays fixed while
  * mobile toolbars show and hide, so pinned cards do not jump.
  *
@@ -287,7 +288,31 @@ export function ServiceStack({
       });
     };
 
+    // A link to a card (#service-<id>, from the footer) would jump to where
+    // every stuck card lies on top of the others, so it is covered. Land
+    // where that card has just settled instead, as for keyboard focus.
+    const settleOnHash = () => {
+      if (!active || !layout) return;
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      const index = id ? items.findIndex((item) => item.id === id) : -1;
+      if (index < 0) return;
+      const naturalTop = list.getBoundingClientRect().top + layout.offsets[index];
+      // A card taller than the window is pinned by its bottom edge; show its
+      // start instead, just below the header, before it pins.
+      const landing = Math.max(layout.tops[index], layout.visibleTop);
+      window.scrollBy({ top: naturalTop - landing, behavior: "instant" });
+    };
+    // After the browser's own jump.
+    const onHashChange = () => window.requestAnimationFrame(settleOnHash);
+    // The same link again fires no hashchange, but the browser jumps again.
+    const onClick = (event: MouseEvent) => {
+      const link = event.target instanceof Element ? event.target.closest("a") : null;
+      if (!link || !link.hash || link.pathname !== window.location.pathname) return;
+      if (link.hash === window.location.hash) window.requestAnimationFrame(settleOnHash);
+    };
+
     measure();
+    if (window.location.hash) window.requestAnimationFrame(settleOnHash);
     document.fonts?.ready.then(() => {
       if (!disposed) scheduleMeasure();
     });
@@ -297,6 +322,8 @@ export function ServiceStack({
     window.addEventListener("resize", onResize);
     reducedMotion.addEventListener("change", scheduleMeasure);
     list.addEventListener("focusin", onFocusIn);
+    window.addEventListener("hashchange", onHashChange);
+    document.addEventListener("click", onClick);
 
     return () => {
       disposed = true;
@@ -306,6 +333,8 @@ export function ServiceStack({
       window.removeEventListener("resize", onResize);
       reducedMotion.removeEventListener("change", scheduleMeasure);
       list.removeEventListener("focusin", onFocusIn);
+      window.removeEventListener("hashchange", onHashChange);
+      document.removeEventListener("click", onClick);
       viewportProbe.remove();
       turnOff();
     };
