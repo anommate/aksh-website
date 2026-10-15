@@ -23,8 +23,9 @@ const subscribeToMotionPreference = (onChange: () => void) => {
  *   motion, loading). Once running, each layer drifts one period on its own
  *   loop and speed (src/app/globals.css); text and controls never move
  * - Pauses while off screen or while the tab is hidden; the Pause/Resume
- *   control holds a manual pause. Its row is always reserved, so nothing
- *   shifts when it appears, and it is removed under reduced motion
+ *   control, centred last in the footer, holds a manual pause. Its row is
+ *   always reserved, so nothing shifts when it appears, and it is removed
+ *   under reduced motion
  */
 export function FooterWaves({ waves, children }: { waves: FooterWavesGeometry; children: ReactNode }) {
   const waveRef = useRef<HTMLDivElement | null>(null);
@@ -75,7 +76,7 @@ export function FooterWaves({ waves, children }: { waves: FooterWavesGeometry; c
         <Container>
           {children}
 
-          <div className="mt-40 border-t border-warm-stone/25 pt-24 flex justify-end min-h-(--target-min-size) motion-reduce:hidden">
+          <div className="mt-24 flex justify-center min-h-(--target-min-size) motion-reduce:hidden">
             <button
               type="button"
               onClick={() => setPaused(!paused)}

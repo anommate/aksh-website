@@ -266,6 +266,12 @@
   --service-stack-depth-max: 3;
   --service-stack-tall: 0;
   --service-stack-min-window: 400px;
+  /*
+   * Services progress line: its thickness. It sits centred in the gap between
+   * the header and the first card's sticky top (--service-stack-gap), so the
+   * gap must stay at least a few pixels taller than the line.
+   */
+  --service-progress-height: 2px;
 
   /* Controls. The 15px and 13px button insets are border-adjusted exceptions. */
   --control-min-height: var(--spacing-52);
@@ -301,6 +307,33 @@
   --masthead-artwork-width: 440px;
   /* The AKSH Experience wordmark: up to 640px wide (so the section fits one desktop view), the container width below. */
   --experience-masthead-width: 640px;
+  /*
+   * About Us masthead: up to 560px wide, the container width below. The file
+   * has wide transparent side margins, so this keeps its lettering about as
+   * wide as the earlier artwork's at 440px.
+   */
+  --about-masthead-width: 560px;
+  /*
+   * Footer columns: one row rhythm for links and details alike. Each line of
+   * 14/22px footer text sits in a 44px row (the inset above and below makes up
+   * the minimum target), so a two-line address grows by one line. Headings
+   * sit 16px above the first line of text in every column.
+   */
+  --footer-row-inset: calc((var(--target-min-size) - var(--leading-footer)) / 2);
+  --footer-heading-gap: calc(var(--spacing-16) - var(--footer-row-inset));
+  /*
+   * Footer logo, in the Connect column: the transparent inverse artwork, up to
+   * 240px wide (the column below that), and the space between the details
+   * above and its lettering.
+   */
+  --footer-logo-width: 240px;
+  --footer-logo-gap: var(--spacing-24);
+  /* Our Services wordmark (single line): up to 640px wide, the container width below. */
+  --services-masthead-width: 640px;
+  /* Meet Our Consultant wordmark: the same width as The AKSH Experience's, so the two match. */
+  --consultant-masthead-width: var(--experience-masthead-width);
+  /* Space from the bottom of the Experience wordmark's lettering (not its transparent margin) to the H2. */
+  --experience-masthead-gap: var(--spacing-28);
 
   /* Client Experiences lettering: up to 800px wide, the container width below. */
   --testimonials-masthead-width: 800px;
@@ -428,6 +461,7 @@
     --testimonials-viewport-height: min(560px, 80svh);
     --testimonials-fade: var(--spacing-32);
     --faq-answer-indent: var(--spacing-16);
+    --experience-masthead-gap: var(--spacing-24);
     --footer-wave-height: var(--spacing-64);
 
     --space-eyebrow-heading: var(--spacing-8);

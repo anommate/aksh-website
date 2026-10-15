@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 
 interface LogoProps {
-  size?: "desktop" | "tablet" | "mobile" | "drawer" | "footer";
+  size?: "desktop" | "tablet" | "mobile" | "drawer";
   priority?: boolean;
   className?: string;
 }
@@ -24,8 +24,6 @@ export function Logo({ size = "desktop", priority = true, className = "" }: Logo
     tablet: { width: 82, height: 44, imgWidth: 130, imgHeight: 100 },
     mobile: { width: 74, height: 40, imgWidth: 117, imgHeight: 90 },
     drawer: { width: 76, height: 41, imgWidth: 121, imgHeight: 93 },
-    // Footer logo band: the same artwork and crop ratios, scaled up.
-    footer: { width: 152, height: 80, imgWidth: 240, imgHeight: 184 },
   }[size];
 
   return (

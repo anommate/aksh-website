@@ -196,10 +196,10 @@ test.describe("About Us Section", () => {
     const section = page.locator("section#about-aksh");
     await expect(section).toBeVisible();
 
-    // Verify Masthead Artwork (empty alt attribute for decorative artwork)
-    const artwork = section.locator("img[src*='about-us-artwork']");
+    // Verify Masthead Artwork: the supplied "ABOUT US" file, named by its alt text
+    const artwork = section.getByRole("img", { name: "About Us", exact: true });
     await expect(artwork).toBeVisible();
-    await expect(artwork).toHaveAttribute("alt", "");
+    await expect(artwork).toHaveAttribute("src", "/brand/about-us-masthead-2026-10-15.png");
 
     // Verify Eyebrow
     await expect(section.getByText("ABOUT AKSH")).toBeVisible();

@@ -93,7 +93,8 @@ test("capture keyboard focus: a link, the paused control and the logo (1440x900,
     await page.keyboard.press("Enter");
     await page.waitForTimeout(300);
     await page.screenshot({ path: captureFile(`focus-paused-control-${width}x${height}.png`) });
-    await page.keyboard.press("Tab");
+    // The logo link comes just before the control.
+    await page.keyboard.press("Shift+Tab");
     await page.waitForTimeout(300);
     await page.screenshot({ path: captureFile(`focus-logo-${width}x${height}.png`) });
   }

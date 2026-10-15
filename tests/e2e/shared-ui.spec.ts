@@ -109,10 +109,12 @@ test.describe("decorative signal dots", () => {
     test(`hero, About, divider, Services, consultant, Experience and dialog dots are 6x6px (${width}px)`, async ({ page }) => {
       await open(page, width, 844);
       const dots = page.locator("main span.bg-signal-red.rounded-circle");
-      // Five before; The AKSH Experience adds its five timeline dots (its
-      // wordmark artwork carries its own red dot). Client Experiences has
-      // masthead artwork and no dot. The FAQ adds its two eyebrow dots.
-      await expect(dots).toHaveCount(12);
+      // Four before (hero, About, divider, Services; Meet Our Consultant's
+      // eyebrow and dot gave way to its wordmark artwork); The AKSH Experience
+      // adds its five timeline dots (its wordmark artwork carries its own red
+      // dot). Client Experiences has masthead artwork and no dot. The FAQ adds
+      // its two eyebrow dots.
+      await expect(dots).toHaveCount(11);
       for (const dot of await dots.all()) await expectDot(dot);
 
       await page.getByRole("button", { name: "Discover AKSH" }).click();

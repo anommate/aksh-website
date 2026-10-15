@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -72,11 +73,22 @@ describe("homepage services content", () => {
   it("uses the masthead artwork, with its real intrinsic size, as the section label", () => {
     const { artwork } = servicesContent;
     expect(artwork.alt).toBe("Our Services");
-    expect(artwork.src).toBe("/brand/our-services-masthead.png");
+    expect(artwork.src).toBe("/brand/our-services-masthead-2026-10-15.png");
     // PNG IHDR: width and height are big-endian uint32 at bytes 16 and 20.
     const png = readFileSync(join(process.cwd(), "public", artwork.src));
     expect(png.subarray(1, 4).toString("ascii")).toBe("PNG");
     expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([artwork.width, artwork.height]);
+    expect([artwork.width, artwork.height]).toEqual([2048, 682]);
+    expect(artwork.ink).toEqual({ top: 273, bottom: 425 });
+  });
+
+  it("serves the supplied single-line wordmark exactly as archived, byte for byte", () => {
+    const original = readFileSync(join(process.cwd(), "assets/source/brand/our-services-artwork-2026-10-15.png"));
+    const display = readFileSync(join(process.cwd(), "public", servicesContent.artwork.src));
+    expect(createHash("sha256").update(original).digest("hex")).toBe(
+      "327a18c79c851db7d2fe78d6cc640c07c5eef7eacdf69fd47cf398174584de99"
+    );
+    expect(display.equals(original)).toBe(true);
   });
 
   it("lists the four categories, in order, with their exact copy and twelve treatments", () => {

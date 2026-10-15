@@ -1,4 +1,52 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Locator } from "@playwright/test";
+import { aboutContent } from "../../src/content/about";
+
+const { artwork } = aboutContent;
+
+/**
+ * The masthead image and its lettering. The file is shown whole, transparent
+ * margins included; the lettering (its ink rows and columns) is what shows.
+ */
+async function measureMasthead(image: Locator) {
+  await image.evaluate((img: HTMLImageElement) => img.decode());
+  return image.evaluate(
+    (img: HTMLImageElement, ink) => {
+      const rect = img.getBoundingClientRect();
+      const container = img.closest(".aksh-container")!.getBoundingClientRect();
+      const content = img.closest(".aksh-container")!.getBoundingClientRect().top;
+      let clipped: string | null = null;
+      for (let el: Element | null = img.parentElement; el; el = el.parentElement) {
+        const style = getComputedStyle(el);
+        if (style.overflowY !== "visible" || style.clipPath !== "none") clipped = clipped ?? el.tagName;
+      }
+      return {
+        src: img.getAttribute("src"),
+        alt: img.getAttribute("alt"),
+        width: rect.width,
+        ratio: rect.height / rect.width,
+        containerWidth: container.width,
+        centreOffset: rect.left + rect.width / 2 - (container.left + container.width / 2),
+        inside: rect.left >= container.left - 0.5 && rect.right <= container.right + 0.5,
+        clipped,
+        lettering: {
+          left: rect.left + rect.width * ink.left,
+          right: rect.left + rect.width * ink.right,
+          top: rect.top + rect.height * ink.top,
+          bottom: rect.top + rect.height * ink.bottom,
+        },
+        contentTop: content,
+        boxHeight: img.closest("[data-about-masthead]")!.getBoundingClientRect().height,
+      };
+    },
+    {
+      top: artwork.ink.top / artwork.height,
+      bottom: (artwork.ink.bottom + 1) / artwork.height,
+      // Measured ink columns of the supplied file (x 210-1559).
+      left: 210 / artwork.width,
+      right: 1560 / artwork.width,
+    }
+  );
+}
 
 test.describe("About Us Section Geometry & Visibility Specification", () => {
   const DESKTOP_VIEWPORTS = [
@@ -25,26 +73,22 @@ test.describe("About Us Section Geometry & Visibility Specification", () => {
       const sectionBox = await section.boundingBox();
       expect(sectionBox).not.toBeNull();
 
-      // Artwork measurements
-      const artwork = section.locator("img[src*='about-us-artwork']");
-      const artworkBox = await artwork.boundingBox();
-      expect(artworkBox).not.toBeNull();
-      if (!artworkBox) return;
-
-      // Artwork width between 420-480px and height between 125-145px
-      expect(artworkBox.width).toBeGreaterThanOrEqual(420);
-      expect(artworkBox.width).toBeLessThanOrEqual(480);
-      expect(artworkBox.height).toBeGreaterThanOrEqual(125);
-      expect(artworkBox.height).toBeLessThanOrEqual(145);
-
-      // Artwork is centered within the container
-      const container = section.locator(".aksh-container");
-      const containerBox = await container.boundingBox();
-      if (containerBox) {
-        const containerMid = containerBox.x + containerBox.width / 2;
-        const artworkMid = artworkBox.x + artworkBox.width / 2;
-        expect(Math.abs(containerMid - artworkMid)).toBeLessThanOrEqual(2);
-      }
+      // Masthead: the supplied file, whole, centred, 560px wide; its
+      // lettering about as wide as the earlier artwork (420-480px), in
+      // proportion, starting at the content top and below the header.
+      const m = await measureMasthead(section.getByRole("img", { name: artwork.alt, exact: true }));
+      expect(m.src).toBe(artwork.src);
+      expect(Math.abs(m.width - 560)).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(m.ratio - artwork.height / artwork.width)).toBeLessThanOrEqual(0.003);
+      expect(Math.abs(m.centreOffset)).toBeLessThanOrEqual(0.5);
+      expect(m.inside).toBe(true);
+      expect(m.clipped).toBeNull();
+      expect(m.boxHeight % 1).toBe(0);
+      const letteringWidth = m.lettering.right - m.lettering.left;
+      expect(letteringWidth).toBeGreaterThanOrEqual(420);
+      expect(letteringWidth).toBeLessThanOrEqual(480);
+      expect(Math.abs(m.lettering.top - m.contentTop)).toBeLessThanOrEqual(1);
+      expect(m.lettering.top).toBeGreaterThanOrEqual(headerBox.height);
 
       // Discover CTA Button is fully visible in viewport below navbar without scrolling
       const ctaBtn = section.getByRole("button", { name: /Discover AKSH/i });
@@ -80,6 +124,17 @@ test.describe("About Us Section Geometry & Visibility Specification", () => {
 
       const section = page.locator("section#about-aksh");
       await expect(section).toBeVisible();
+
+      // Masthead whole and centred at the container width (or 560px), its
+      // lettering inside the viewport.
+      const m = await measureMasthead(section.getByRole("img", { name: artwork.alt, exact: true }));
+      expect(Math.abs(m.width - Math.min(560, m.containerWidth))).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(m.ratio - artwork.height / artwork.width)).toBeLessThanOrEqual(0.003);
+      expect(Math.abs(m.centreOffset)).toBeLessThanOrEqual(0.5);
+      expect(m.inside).toBe(true);
+      expect(m.clipped).toBeNull();
+      expect(m.lettering.left).toBeGreaterThanOrEqual(0);
+      expect(m.lettering.right).toBeLessThanOrEqual(vp.width);
 
       // CTA is present and clickable
       const ctaBtn = section.getByRole("button", { name: /Discover AKSH/i });

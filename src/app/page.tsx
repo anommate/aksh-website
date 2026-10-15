@@ -15,9 +15,11 @@ export default function Home() {
       {/*
         About keeps its own bottom padding (32/40/32px), so the divider adds
         only what balances it: about 40px either side on desktop and tablet,
-        about 30px on mobile, counting the margin inside the Services artwork.
+        about 30px on mobile. The Services wordmark's lettering starts at the
+        section top (its transparent margin is offset), so the padding below
+        is the whole gap.
       */}
-      <SectionDivider className="desktop:pt-8 pb-20 tablet:pb-28" />
+      <SectionDivider className="desktop:pt-8 pb-28 tablet:pb-40" />
       <ServicesSection />
       <ConsultantSection />
       <ExperienceSection />

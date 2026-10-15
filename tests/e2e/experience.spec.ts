@@ -152,7 +152,9 @@ test("renders the exact copy with H2, H3 step titles and a bold closing line", a
   const masthead = experience.getByRole("img", { name: artwork.alt });
   await expect(masthead).toBeVisible();
   await expect(experience.getByText("THE AKSH EXPERIENCE", { exact: true })).toHaveCount(0);
-  await expect(experience.locator(":scope > .aksh-container > div:first-child > :first-child")).toHaveAttribute("alt", artwork.alt);
+  await expect(experience.locator(":scope > .aksh-container > div:first-child > [data-experience-masthead] > img")).toHaveAttribute("alt", artwork.alt);
+  // The supplied file itself: not routed through the image optimiser.
+  await expect(masthead).toHaveAttribute("src", artwork.src);
   await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
   await expect(experience.getByRole("heading", { level: 2 })).toHaveText(heading);
   await expect(experience).toHaveAttribute("aria-labelledby", "experience-heading");
@@ -184,11 +186,16 @@ async function measureMasthead(page: Page) {
   const image = section(page).getByRole("img", { name: artwork.alt });
   await image.scrollIntoViewIfNeeded();
   await image.evaluate((img: HTMLImageElement) => img.decode());
-  return image.evaluate((img: HTMLImageElement, margin) => {
+  return image.evaluate((img: HTMLImageElement, ink) => {
     const rect = img.getBoundingClientRect();
     const container = img.closest(".aksh-container")!.getBoundingClientRect();
-    const parent = img.parentElement!.getBoundingClientRect();
-    const heading = img.parentElement!.querySelector("h2")!.getBoundingClientRect();
+    const column = img.closest("[data-experience-masthead]")!.parentElement!;
+    const parent = column.getBoundingClientRect();
+    const sectionTop = img.closest("section")!.getBoundingClientRect().top;
+    const heading = column.querySelector("h2")!.getBoundingClientRect();
+    // The lettering's rows inside the file (its transparent margin excluded).
+    const inkTop = rect.top + rect.height * ink.top;
+    const inkBottom = rect.top + rect.height * ink.bottom;
     return {
       left: rect.left,
       right: rect.right,
@@ -198,12 +205,21 @@ async function measureMasthead(page: Page) {
       fit: getComputedStyle(img).objectFit,
       centreOffset: rect.left + rect.width / 2 - (container.left + container.width / 2),
       containerWidth: container.width,
-      insideParent: rect.left >= parent.left - 0.5 && rect.right <= parent.right + 0.5 && rect.top >= parent.top - 0.5,
-      boxGap: heading.top - rect.bottom,
-      // The artwork keeps a 28px margin (of 261px) below its lettering.
-      letteringGap: heading.top - (rect.bottom - rect.height * margin),
+      // Whole and uncropped: the full image box, nothing clipping it.
+      insideParent: rect.left >= parent.left - 0.5 && rect.right <= parent.right + 0.5,
+      clipped: (() => {
+        for (let el: Element | null = img.parentElement; el; el = el.parentElement) {
+          const style = getComputedStyle(el);
+          if (style.overflowY !== "visible" || style.clipPath !== "none") return el.tagName;
+        }
+        return null;
+      })(),
+      // The lettering starts at the section top (its transparent margin overlaps the gap above).
+      inkTopOffset: inkTop - sectionTop,
+      letteringGap: heading.top - inkBottom,
+      boxHeight: img.closest("[data-experience-masthead]")!.getBoundingClientRect().height,
     };
-  }, 28 / artwork.height);
+  }, { top: artwork.ink.top / artwork.height, bottom: (artwork.ink.bottom + 1) / artwork.height });
 }
 
 const MASTHEAD_SIZES = [
@@ -216,7 +232,7 @@ const MASTHEAD_SIZES = [
 ];
 
 for (const viewport of MASTHEAD_SIZES) {
-  test(`masthead is whole, centred, proportional and 24-32px above the H2 at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+  test(`masthead is whole, centred, proportional and its lettering 24-28px above the H2 at ${viewport.width}x${viewport.height}`, async ({ page }) => {
     await open(page, viewport.width, viewport.height);
     const m = await measureMasthead(page);
     expect(Math.abs(m.centreOffset)).toBeLessThanOrEqual(0.5);
@@ -225,8 +241,12 @@ for (const viewport of MASTHEAD_SIZES) {
     expect(Math.abs(m.naturalRatio - artwork.height / artwork.width)).toBeLessThanOrEqual(0.003);
     expect(m.fit).toBe("contain");
     expect(m.insideParent).toBe(true);
-    expect(m.letteringGap).toBeGreaterThanOrEqual(24 - 0.5);
-    expect(m.letteringGap).toBeLessThanOrEqual(32 + 0.5);
+    expect(m.clipped).toBeNull();
+    expect(Math.abs(m.inkTopOffset)).toBeLessThanOrEqual(1);
+    // The box is rounded to a whole pixel, so allow up to half a pixel either way, plus measuring error.
+    expect(Math.abs(m.letteringGap - (viewport.width < 768 ? 24 : 28))).toBeLessThanOrEqual(0.75);
+    // The wordmark's box is a whole number of pixels tall, so it shifts nothing below it off the pixel grid.
+    expect(m.boxHeight % 1).toBe(0);
     expect(await overflow(page)).toBe(0);
   });
 }
@@ -243,7 +263,7 @@ for (const viewport of [
     await page.evaluate(() => document.fonts.ready);
     await expectLanded(page);
 
-    const fit = await section(page).evaluate((s) => {
+    const fit = await section(page).evaluate((s, ink) => {
       const header = document.querySelector("header")!.getBoundingClientRect().bottom;
       const box = (el: Element) => el.getBoundingClientRect();
       const inView = (el: Element) => {
@@ -251,7 +271,6 @@ for (const viewport of [
         return r.top >= header - 0.5 && r.bottom <= window.innerHeight + 0.5 && r.left >= 0 && r.right <= window.innerWidth;
       };
       const parts: Record<string, Element> = {
-        masthead: s.querySelector("img")!,
         heading: s.querySelector("h2")!,
         tagline: s.querySelector("p.italic")!,
         control: s.querySelector("[data-journey-motion] button")!,
@@ -260,6 +279,11 @@ for (const viewport of [
       };
       s.querySelectorAll("[data-journey-step] > div").forEach((card, i) => (parts[`step ${i + 1}`] = card));
       const outOfView = Object.entries(parts).filter(([, el]) => !inView(el)).map(([name]) => name);
+      // The wordmark's lettering; its transparent margin may sit under the header.
+      const art = box(s.querySelector("img")!);
+      const letteringTop = art.top + art.height * ink.top;
+      const letteringBottom = art.top + art.height * ink.bottom;
+      if (letteringTop < header - 0.5 || letteringBottom > window.innerHeight + 0.5) outOfView.unshift("masthead lettering");
 
       // Nothing clipped, scrolled internally or shrunk to fit.
       const ancestors: Element[] = [];
@@ -282,7 +306,7 @@ for (const viewport of [
         descriptionSize: parseFloat(getComputedStyle(description).fontSize),
         art: box(s.querySelector("[data-journey-illustration]")!).width,
       };
-    });
+    }, { top: artwork.ink.top / artwork.height, bottom: (artwork.ink.bottom + 1) / artwork.height });
     expect(fit.outOfView).toEqual([]);
     expect(fit.transformed).toEqual([]);
     expect(fit.sectionOverflow).toBe("visible");
@@ -640,7 +664,13 @@ test("CTA follows the motion control by keyboard, opens the Book a Consultation 
   await page.keyboard.press("Tab");
   await expect(button).toBeFocused();
   expect(await button.evaluate((e) => getComputedStyle(e).outlineStyle)).toBe("solid");
-  await expect(button).toBeInViewport({ ratio: 1 });
+  // Fully in view, give or take a sub-pixel: sections above can end between
+  // pixels (About's height is fractional at some widths), and focus scrolling
+  // moves by whole pixels.
+  const box = (await button.boundingBox())!;
+  const viewport = page.viewportSize()!;
+  expect(box.y).toBeGreaterThanOrEqual(-0.5);
+  expect(box.y + box.height).toBeLessThanOrEqual(viewport.height + 0.5);
 
   await page.keyboard.press("Enter");
   const dialog = page.getByRole("dialog", { name: `Development Preview: ${cta.destinationName}` });

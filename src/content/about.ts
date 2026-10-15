@@ -7,11 +7,18 @@
 
 export interface AboutSectionContent {
   id: string;
+  /** Owner-supplied "ABOUT US" masthead artwork (oversized A and lettering). */
   artwork: {
     src: string;
     alt: string;
     width: number;
     height: number;
+    /**
+     * First and last pixel rows holding lettering (alpha >= 2); the rows
+     * outside them are the file's own transparent margin, which the layout
+     * offsets rather than crops.
+     */
+    ink: { top: number; bottom: number };
   };
   eyebrow: string;
   heading: string;
@@ -35,11 +42,15 @@ export interface AboutSectionContent {
 
 export const aboutContent: AboutSectionContent = {
   id: "about-aksh",
+  // The owner-supplied file exactly as received (15 Oct 2026), byte-identical
+  // to assets/source/brand/about-us-artwork-2026-10-15.png: not cropped,
+  // resized, recoloured or re-encoded, and served unoptimised.
   artwork: {
-    src: "/brand/about-us-artwork.png",
-    alt: "", // Empty alt attribute for decorative masthead artwork per accessibility spec
-    width: 741,
-    height: 229,
+    src: "/brand/about-us-masthead-2026-10-15.png",
+    alt: "About Us",
+    width: 1774,
+    height: 887,
+    ink: { top: 281, bottom: 617 },
   },
   eyebrow: "ABOUT AKSH",
   heading: "The Art of Feeling Your Best.",

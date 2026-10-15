@@ -298,13 +298,17 @@ test.describe("services content", () => {
     await expect(section.locator("a")).toHaveCount(0);
   });
 
+  // Artwork: up to 640px, the container width below. Gap: from the lettering
+  // (not the file's transparent margin) to the eyebrow, --space-intro-content.
   const MASTHEAD_VIEWPORTS = [
-    { width: 1440, height: 900, artwork: 440, gap: 24, cards: 40 },
-    { width: 1366, height: 768, artwork: 440, gap: 24, cards: 40 },
-    { width: 768, height: 1024, artwork: 440, gap: 24, cards: 32 },
-    { width: 390, height: 844, artwork: 350, gap: 20, cards: 28 },
-    { width: 320, height: 568, artwork: 288, gap: 20, cards: 28 },
+    { width: 1440, height: 900, artwork: 640, gap: 40, cards: 40 },
+    { width: 1366, height: 768, artwork: 640, gap: 40, cards: 40 },
+    { width: 768, height: 1024, artwork: 640, gap: 32, cards: 32 },
+    { width: 390, height: 844, artwork: 350, gap: 28, cards: 28 },
+    { width: 320, height: 568, artwork: 288, gap: 28, cards: 28 },
   ];
+  const { ink } = servicesContent.artwork;
+  const inkRows = { top: ink.top / servicesContent.artwork.height, bottom: (ink.bottom + 1) / servicesContent.artwork.height };
 
   for (const viewport of MASTHEAD_VIEWPORTS) {
     test(`masthead artwork is whole, proportional and compact at ${viewport.width}x${viewport.height}`, async ({ page }) => {
@@ -312,9 +316,8 @@ test.describe("services content", () => {
       const artwork = page.locator("section#services").getByRole("img", { name: "Our Services" });
       await artwork.evaluate((img: HTMLImageElement) => img.decode());
 
-      const geometry = await artwork.evaluate((img: HTMLImageElement) => {
+      const geometry = await artwork.evaluate((img: HTMLImageElement, rows) => {
         const rect = img.getBoundingClientRect();
-        const parent = img.parentElement!.getBoundingClientRect();
         const container = img.closest(".aksh-container")!.getBoundingClientRect();
         const eyebrow = img.closest("[data-services-masthead]")!.querySelector(".grid")!.getBoundingClientRect();
         const masthead = img.closest("[data-services-masthead]")!;
@@ -333,26 +336,39 @@ test.describe("services content", () => {
           fit: getComputedStyle(img).objectFit,
           centreOffset: rect.left + rect.width / 2 - (container.left + container.width / 2),
           insideContainer: rect.left >= container.left - 0.5 && rect.right <= container.right + 0.5,
-          unclipped: parent.top <= rect.top + 0.5 && parent.bottom >= rect.bottom - 0.5,
-          gapToIntroduction: eyebrow.top - rect.bottom,
+          // Whole and uncropped: nothing above the image clips it.
+          clipped: (() => {
+            for (let el: Element | null = img.parentElement; el; el = el.parentElement) {
+              const style = getComputedStyle(el);
+              if (style.overflowY !== "visible" || style.clipPath !== "none") return el.tagName;
+            }
+            return null;
+          })(),
+          // The lettering starts at the section top; its transparent margin overlaps the gap above.
+          inkTopOffset: rect.top + rect.height * rows.top - section.getBoundingClientRect().top,
+          gapToIntroduction: eyebrow.top - (rect.top + rect.height * rows.bottom),
+          boxHeight: img.closest("[data-services-wordmark]")!.getBoundingClientRect().height,
+          src: img.getAttribute("src"),
           introToCards: list.getBoundingClientRect().top - eyebrow.bottom,
           surfaces,
         };
-      });
+      }, inkRows);
 
-      // Intrinsic size attributes match the asset; the optimised variant the
-      // browser decoded keeps the same proportions.
+      // The supplied file itself, at its intrinsic size and proportions.
+      expect(geometry.src).toBe(servicesContent.artwork.src);
       expect(geometry.intrinsic).toEqual([servicesContent.artwork.width, servicesContent.artwork.height]);
       const ratio = servicesContent.artwork.height / servicesContent.artwork.width;
       expect(Math.abs(geometry.naturalRatio - ratio)).toBeLessThanOrEqual(0.005);
       expect(Math.abs(geometry.width - viewport.artwork)).toBeLessThanOrEqual(0.5);
-      expect(geometry.width).toBeLessThanOrEqual(480);
       expect(Math.abs(geometry.height - geometry.width * ratio)).toBeLessThanOrEqual(1);
       expect(geometry.fit).toBe("contain");
       expect(Math.abs(geometry.centreOffset)).toBeLessThanOrEqual(0.5);
       expect(geometry.insideContainer).toBe(true);
-      expect(geometry.unclipped).toBe(true);
-      expect(Math.abs(geometry.gapToIntroduction - viewport.gap)).toBeLessThanOrEqual(0.5);
+      expect(geometry.clipped).toBeNull();
+      expect(Math.abs(geometry.inkTopOffset)).toBeLessThanOrEqual(1);
+      // The box is rounded to a whole pixel: up to half a pixel either way, plus measuring error.
+      expect(Math.abs(geometry.gapToIntroduction - viewport.gap)).toBeLessThanOrEqual(0.75);
+      expect(geometry.boxHeight % 1).toBe(0);
       expect(Math.abs(geometry.introToCards - viewport.cards)).toBeLessThanOrEqual(0.5);
       // No stone band: only the section paints a background, in Brand Ivory.
       expect(geometry.surfaces.at(-1)).toBe("rgb(249, 248, 244)");
@@ -365,13 +381,19 @@ test.describe("services content", () => {
     });
   }
 
-  test("#services lands 24px below the sticky header, artwork fully visible", async ({ page }) => {
+  test("#services lands 24px below the sticky header, the wordmark lettering fully visible", async ({ page }) => {
     for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
       await open(page, viewport, "/#services");
       await settle(page);
       const top = await page.locator("section#services").evaluate((s) => s.getBoundingClientRect().top);
       expect(Math.abs(top - (await headerBottom(page)) - 24)).toBeLessThanOrEqual(1);
-      await expect(page.getByRole("img", { name: "Our Services" })).toBeInViewport({ ratio: 1 });
+      // The lettering rows; the file's transparent margin above them may sit under the header.
+      const lettering = await page.getByRole("img", { name: "Our Services" }).evaluate((img, rows) => {
+        const rect = img.getBoundingClientRect();
+        return { top: rect.top + rect.height * rows.top, bottom: rect.top + rect.height * rows.bottom };
+      }, inkRows);
+      expect(lettering.top).toBeGreaterThanOrEqual((await headerBottom(page)) - 0.5);
+      expect(lettering.bottom).toBeLessThanOrEqual(viewport.height);
     }
   });
 });
@@ -924,4 +946,199 @@ test.describe("normal-flow fallbacks", () => {
       await context.close();
     });
   }
+});
+
+test.describe("services progress line", () => {
+  const progress = (page: Page) => page.locator("section#services [data-service-progress]");
+  const value = (page: Page) =>
+    progress(page).evaluate((el) => Number.parseFloat((el as HTMLElement).style.getPropertyValue("--service-progress")));
+  const scrollTo = async (page: Page, top: number) => {
+    await page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), top);
+    await settle(page);
+    // The update runs in the next animation frame.
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  };
+  // Where the first card's top meets the reading line (the line's sticky top).
+  const startPoint = (page: Page) =>
+    page.evaluate(() => {
+      const list = document.querySelector("section#services ol")!;
+      const reading = Number.parseFloat(getComputedStyle(document.querySelector("[data-service-progress]")!).top);
+      return list.getBoundingClientRect().top + window.scrollY - reading;
+    });
+  // The line's geometry against the header and the first card's sticky top.
+  const lineGeometry = (page: Page) =>
+    progress(page).evaluate((el) => {
+      const box = (selector: string) => el.querySelector(selector)!.getBoundingClientRect();
+      const track = box("[data-service-progress-track]");
+      const band = box("[data-service-progress-band]");
+      const container = el.closest(".aksh-container")!.getBoundingClientRect();
+      return {
+        header: document.querySelector("header")!.getBoundingClientRect().bottom,
+        reading: Number.parseFloat(getComputedStyle(el).top),
+        track: { top: track.top, bottom: track.bottom, left: track.left, width: track.width, height: track.height },
+        band: { top: band.top, bottom: band.bottom },
+        container: { left: container.left, width: container.width },
+        colours: [
+          getComputedStyle(el.querySelector("[data-service-progress-track]")!).backgroundColor,
+          getComputedStyle(el.querySelector("[data-service-progress-fill]")!).backgroundColor,
+        ],
+      };
+    });
+
+  const VIEWPORTS = [
+    { width: 1440, height: 900, mode: "fit" },
+    { width: 768, height: 1024, mode: "tall" },
+    { width: 390, height: 844, mode: "tall" },
+    { width: 320, height: 568, mode: "tall" },
+  ];
+
+  for (const viewport of VIEWPORTS) {
+    test(`fills from the first card's reading position to the last card settling, and reverses, at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+      test.setTimeout(90_000);
+      await open(page, viewport);
+      await expect(stack(page)).toHaveAttribute("data-stack", "on");
+      const line = progress(page);
+      await expect(line).toHaveAttribute("aria-hidden", "true");
+      await expect(line).not.toHaveAttribute("hidden", /.*/);
+      await expect(line).toHaveCSS("pointer-events", "none");
+      await expect(line).toHaveCSS("height", "0px");
+
+      // Elsewhere on the page: empty above the stack.
+      await scrollTo(page, 0);
+      expect(await value(page)).toBe(0);
+      const start = await startPoint(page);
+      await scrollTo(page, start - 40);
+      expect(await value(page)).toBe(0);
+
+      // Stuck: a thin stone track with a red fill, across the content width,
+      // between the header and the first card's sticky top, never over either.
+      await scrollTo(page, start + 200);
+      const g = await lineGeometry(page);
+      expect(g.colours).toEqual(["rgb(228, 222, 211)", "rgb(255, 0, 0)"]);
+      expect(g.track.height).toBe(2);
+      expect(g.track.left).toBeCloseTo(g.container.left, 0);
+      expect(g.track.width).toBeCloseTo(g.container.width, 0);
+      expect(g.band.top).toBeCloseTo(g.header, 0);
+      expect(g.band.bottom).toBeCloseTo(g.reading, 0);
+      expect(g.track.top).toBeGreaterThan(g.header + 2);
+      expect(g.track.bottom).toBeLessThan(g.reading - 2);
+      if (viewport.mode === "fit") {
+        const firstCard = await items(page).first().evaluate((el) => el.getBoundingClientRect().top);
+        expect(firstCard).toBeCloseTo(g.reading, 0);
+      }
+
+      // Forward: rises steadily to exactly 1 when the last card settles.
+      await scrollToSettlePoint(page);
+      const end = await scrollPosition(page);
+      expect(await value(page)).toBeCloseTo(1, 2);
+      const positions = Array.from({ length: 9 }, (_, i) => Math.round(start + ((end - start) * (i + 1)) / 10));
+      const forward: number[] = [];
+      for (const y of positions) {
+        await scrollTo(page, y);
+        forward.push(await value(page));
+      }
+      for (let i = 1; i < forward.length; i++) expect(forward[i]).toBeGreaterThan(forward[i - 1]);
+      expect(forward[0]).toBeGreaterThan(0);
+      expect(forward.at(-1)!).toBeLessThan(1);
+      expect(forward[4]).toBeCloseTo(0.5, 1);
+
+      // Past the stack: full, and the line leaves with the section.
+      await scrollTo(page, end + viewport.height * 2);
+      expect(await value(page)).toBe(1);
+      const after = await lineGeometry(page);
+      expect(after.track.bottom).toBeLessThan(after.header);
+
+      // Reverse: the same value at each position on the way back up.
+      const backward: number[] = [];
+      for (const y of [...positions].reverse()) {
+        await scrollTo(page, y);
+        backward.push(await value(page));
+      }
+      expect(backward.reverse()).toEqual(forward);
+      await scrollTo(page, start - 40);
+      expect(await value(page)).toBe(0);
+
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBe(0);
+    });
+  }
+
+  test("tall cards scroll beneath the line's band, never over the line (320x568)", async ({ page }) => {
+    await open(page, { width: 320, height: 568 });
+    const start = await startPoint(page);
+    for (const offset of [300, 900, 1500]) {
+      await scrollTo(page, start + offset);
+      // Directly at the line, the line itself is the hit target: no card
+      // content shows over it.
+      // Hit-testing skips pointer-events: none, so enable it just to read the
+      // painting order, then restore it.
+      const hit = await progress(page).evaluate((el) => {
+        const marker = el as HTMLElement;
+        marker.style.pointerEvents = "auto";
+        for (const child of marker.querySelectorAll<HTMLElement>("*")) child.style.pointerEvents = "auto";
+        const track = el.querySelector("[data-service-progress-track]")!.getBoundingClientRect();
+        const band = el.querySelector("[data-service-progress-band]")!.getBoundingClientRect();
+        const atLine = document.elementFromPoint(track.left + track.width / 2, track.top + track.height / 2);
+        const atBand = document.elementFromPoint(band.left + band.width / 2, band.top + 1);
+        marker.style.removeProperty("pointer-events");
+        for (const child of marker.querySelectorAll<HTMLElement>("*")) child.style.removeProperty("pointer-events");
+        return atLine !== null && el.contains(atLine) && atBand !== null && el.contains(atBand);
+      });
+      expect(hit).toBe(true);
+    }
+  });
+
+  test("resizing re-measures: the line still runs 0 to 1 after rotating", async ({ page }) => {
+    test.setTimeout(60_000);
+    await open(page, { width: 390, height: 844 });
+    await scrollTo(page, (await startPoint(page)) + 500);
+    expect(await value(page)).toBeGreaterThan(0);
+    // Landscape: the stack falls back to normal flow; the line follows natural positions.
+    await page.setViewportSize({ width: 844, height: 390 });
+    await expect(stack(page)).toHaveAttribute("data-stack", "off");
+    await scrollTo(page, 0);
+    expect(await value(page)).toBe(0);
+    await scrollTo(page, (await startPoint(page)) + 300);
+    const middle = await value(page);
+    expect(middle).toBeGreaterThan(0);
+    expect(middle).toBeLessThan(1);
+    await page.evaluate(() => document.querySelector("#meet-our-consultant")!.scrollIntoView({ behavior: "instant" }));
+    await scrollTo(page, await scrollPosition(page));
+    expect(await value(page)).toBe(1);
+    // And back to portrait: stacked again, from empty.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(stack(page)).toHaveAttribute("data-stack", "on");
+    await scrollTo(page, 0);
+    expect(await value(page)).toBe(0);
+  });
+
+  test("reduced motion: exact progress in normal flow, without smoothing", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await open(page, { width: 1440, height: 900 });
+    await expectNormalFlow(page);
+    const fill = progress(page).locator("[data-service-progress-fill]");
+    expect(Number.parseFloat(await fill.evaluate((el) => getComputedStyle(el).transitionDuration))).toBeLessThan(0.001);
+    const start = await startPoint(page);
+    // Normal flow: from the first card's top to the last card's top at the reading line.
+    const end = await page.evaluate(() => {
+      const last = document.querySelector("[data-service-stack-item]:last-child")!;
+      const reading = Number.parseFloat(getComputedStyle(document.querySelector("[data-service-progress]")!).top);
+      return last.getBoundingClientRect().top + window.scrollY - reading;
+    });
+    for (const fraction of [0.25, 0.5, 0.75]) {
+      await scrollTo(page, Math.round(start + (end - start) * fraction));
+      expect(await value(page)).toBeCloseTo(fraction, 2);
+      // The fill shows it at once.
+      const scale = await fill.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
+      expect(scale).toBeCloseTo(fraction, 2);
+    }
+  });
+
+  test("without JavaScript the decorative line is absent", async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto("/");
+    await expect(progress(page)).toHaveAttribute("hidden", "");
+    await expect(progress(page)).toBeHidden();
+    await context.close();
+  });
 });

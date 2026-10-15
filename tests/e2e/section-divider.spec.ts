@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { servicesContent } from "../../src/content/services";
 
 /*
  * Divider between About and Services:
@@ -32,7 +33,7 @@ const VIEWPORTS = [
   { width: 1440, height: 900, above: 43, below: 42 },
   { width: 1366, height: 768, above: 43, below: 42 },
   { width: 768, height: 1024, above: 43, below: 42 },
-  { width: 390, height: 844, above: 35, below: 32 },
+  { width: 390, height: 844, above: 35, below: 30 },
   { width: 320, height: 568, above: 35, below: 30 },
 ];
 
@@ -42,7 +43,7 @@ for (const viewport of VIEWPORTS) {
     await expect(divider(page)).toHaveCount(1);
     await expect(divider(page)).toHaveAttribute("aria-hidden", "true");
 
-    const geometry = await divider(page).evaluate((element) => {
+    const geometry = await divider(page).evaluate((element, inkTop) => {
       const about = document.querySelector("#about-aksh")!;
       const services = document.querySelector("#services")!;
       const [start, end] = [...element.querySelectorAll<HTMLElement>("[data-divider-segment]")];
@@ -73,10 +74,10 @@ for (const viewport of VIEWPORTS) {
         gaps: [dotBox.left - startBox.right, endBox.left - dotBox.right],
         centred: Math.abs(dotBox.left + dotBox.width / 2 - (container.left + container.width / 2)),
         above: startBox.top - about.querySelector("button")!.getBoundingClientRect().bottom,
-        // The artwork carries a 24px (source) ivory margin above its lettering.
-        below: artwork.top + (24 * artwork.width) / 920 - startBox.bottom,
+        // To the wordmark's lettering, below the file's own transparent margin.
+        below: artwork.top + artwork.height * inkTop - startBox.bottom,
       };
-    });
+    }, servicesContent.artwork.ink.top / servicesContent.artwork.height);
 
     expect(geometry.order).toEqual([FOLLOWING, FOLLOWING]);
     expect(geometry.insideServices).toBe(false);

@@ -3,6 +3,10 @@ import { consultantContent } from "../../src/content/consultant";
 
 /*
  * Homepage "Meet Our Consultant" section:
+ * - The owner-supplied "MEET OUR CONSULTANT" wordmark, once, centred above
+ *   the section in place of the typed eyebrow: whole, uncropped, the supplied
+ *   file, up to 640px wide; lettering at the section top and
+ *   --space-intro-content (40/32/28px) above the profile
  * - Exact owner-supplied copy, with bold role and runs, italic tagline
  * - Portrait: the supplied photograph, whole, at its natural ratio, lazy
  *   loaded, nothing drawn over it
@@ -12,7 +16,7 @@ import { consultantContent } from "../../src/content/consultant";
  * - No horizontal overflow at any checked size, 200% zoom or reduced motion
  */
 
-const { name, eyebrow, role, tagline, biography, portrait } = consultantContent;
+const { name, artwork, role, tagline, biography, portrait } = consultantContent;
 const section = (page: Page) => page.locator("section#meet-our-consultant");
 
 async function open(page: Page, width: number, height: number) {
@@ -46,7 +50,13 @@ test("renders the exact copy with bold and italic emphasis, after Services", asy
   );
   expect(order.indexOf("meet-our-consultant")).toBe(order.indexOf("services") + 1);
 
-  await expect(consultant.getByText(eyebrow, { exact: true })).toBeVisible();
+  // The wordmark labels the section once; the typed eyebrow is gone.
+  const masthead = consultant.getByRole("img", { name: artwork.alt, exact: true });
+  await expect(masthead).toHaveCount(1);
+  await expect(masthead).toBeVisible();
+  await expect(masthead).toHaveAttribute("src", artwork.src);
+  await expect(consultant.getByText(/meet our consultant/i)).toHaveCount(0);
+  await expect(page.getByRole("img", { name: artwork.alt, exact: true })).toHaveCount(1);
   await expect(consultant.getByRole("heading", { level: 2 })).toHaveText(name);
   await expect(consultant.getByRole("heading")).toHaveCount(1);
 
@@ -135,7 +145,8 @@ for (const viewport of VIEWPORTS) {
       return {
         container: box(container),
         name: box(s.querySelector("h2")!),
-        portrait: box(s.querySelector("img")!),
+        // The portrait: the image in the profile grid (the wordmark sits above it).
+        portrait: box(s.querySelector(".grid img")!),
         tagline: box(s.querySelector("p.italic")!),
         biography: box(s.querySelector("[data-consultant-biography]")!),
       };
@@ -161,6 +172,64 @@ for (const viewport of VIEWPORTS) {
       expect(boxes.tagline.top).toBeGreaterThan(boxes.portrait.bottom);
       expect(boxes.biography.top).toBeGreaterThan(boxes.tagline.bottom);
     }
+  });
+}
+
+for (const viewport of VIEWPORTS) {
+  test(`wordmark is whole, centred, proportional and above the profile at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+    await open(page, viewport.width, viewport.height);
+    const image = section(page).getByRole("img", { name: artwork.alt, exact: true });
+    await image.scrollIntoViewIfNeeded();
+    await image.evaluate((img: HTMLImageElement) => img.decode());
+    const m = await image.evaluate(
+      (img: HTMLImageElement, ink) => {
+        const rect = img.getBoundingClientRect();
+        const s = img.closest("section")!;
+        const container = img.closest(".aksh-container")!.getBoundingClientRect();
+        const box = img.closest("[data-consultant-masthead]")!.getBoundingClientRect();
+        // The first profile content below: the name block (stacked) or the portrait and name (columns).
+        const below = Math.min(
+          s.querySelector("h2")!.getBoundingClientRect().top,
+          s.querySelector(`img[alt="${ink.portraitAlt}"]`)!.getBoundingClientRect().top
+        );
+        let clipped: string | null = null;
+        for (let el: Element | null = img.parentElement; el; el = el.parentElement) {
+          const style = getComputedStyle(el);
+          if (style.overflowY !== "visible" || style.clipPath !== "none") clipped = clipped ?? el.tagName;
+        }
+        return {
+          width: rect.width,
+          containerWidth: container.width,
+          centreOffset: rect.left + rect.width / 2 - (container.left + container.width / 2),
+          ratio: rect.height / rect.width,
+          naturalRatio: img.naturalHeight / img.naturalWidth,
+          fit: getComputedStyle(img).objectFit,
+          inside: rect.left >= container.left - 0.5 && rect.right <= container.right + 0.5,
+          clipped,
+          inkTopOffset: rect.top + rect.height * ink.top - s.getBoundingClientRect().top,
+          letteringGap: below - (rect.top + rect.height * ink.bottom),
+          boxHeight: box.height,
+        };
+      },
+      {
+        top: artwork.ink.top / artwork.height,
+        bottom: (artwork.ink.bottom + 1) / artwork.height,
+        portraitAlt: portrait.alt,
+      }
+    );
+    expect(Math.abs(m.width - Math.min(640, m.containerWidth))).toBeLessThanOrEqual(0.5);
+    expect(Math.abs(m.centreOffset)).toBeLessThanOrEqual(0.5);
+    expect(Math.abs(m.ratio - artwork.height / artwork.width)).toBeLessThanOrEqual(0.003);
+    expect(Math.abs(m.naturalRatio - artwork.height / artwork.width)).toBeLessThanOrEqual(0.003);
+    expect(m.fit).toBe("contain");
+    expect(m.inside).toBe(true);
+    expect(m.clipped).toBeNull();
+    // The lettering starts at the section top; its transparent margin overlaps the gap above.
+    expect(Math.abs(m.inkTopOffset)).toBeLessThanOrEqual(1);
+    // --space-intro-content: 40px desktop, 32px tablet, 28px mobile (box rounded to a whole pixel).
+    const gap = viewport.width >= 1024 ? 40 : viewport.width >= 768 ? 32 : 28;
+    expect(Math.abs(m.letteringGap - gap)).toBeLessThanOrEqual(0.75);
+    expect(m.boxHeight % 1).toBe(0);
   });
 }
 

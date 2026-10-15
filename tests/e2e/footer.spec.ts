@@ -4,13 +4,18 @@ import { servicesContent } from "../../src/content/services";
 
 /*
  * Site footer (development mode, as the suite runs):
- * - One contentinfo landmark after <main>, in normal flow, holding two areas:
- *   the full-width charcoal area topped by four layered waves, and below it a
- *   full-width ivory band with the logo, once, and the copyright line
- * - Charcoal area, inside the site container: Explore (homepage sections,
- *   with FAQs), Our Services (the four service cards), Visit AKSH and Connect
- *   (placeholder details: labelled, plain text, no actions). Four columns on
- *   desktop, two on tablet, stacked on mobile; 44px targets; no overflow
+ * - One contentinfo landmark after <main>, in normal flow: the full-width
+ *   charcoal area topped by four layered waves; nothing below it
+ * - Inside the site container, one grid: Explore (homepage sections, with
+ *   FAQs), Our Services (the four service cards), Visit AKSH and Connect
+ *   (placeholder details: labelled, plain text, no actions). Four equal
+ *   columns on desktop, two on tablet, one stack on mobile; headings level,
+ *   left-aligned, 16px above the first line, every line on a 44px row
+ * - The one footer logo (transparent inverse artwork) closes the Connect
+ *   column, centred in it, 24px below the details, linking home
+ * - Beneath the grid, under a fine rule: the copyright, centred; then the
+ *   wave control, centred
+ * - 44px targets; ivory focus rings; no overflow
  * - Waves: edge to edge, charcoal at rising opacity, the opaque front layer
  *   joined to the body; text clear of them; each layer drifts on its own
  *   seamless loop; paused off screen, in a hidden tab or by the control;
@@ -23,7 +28,9 @@ const { explore, services, contact, rights } = footerContent;
 const footer = (page: Page) => page.getByRole("contentinfo");
 const surface = (page: Page) => page.locator("footer [data-footer-surface]");
 const body = (page: Page) => page.locator("footer [data-footer-body]");
-const brand = (page: Page) => page.locator("footer [data-footer-brand]");
+const connectColumn = (page: Page) => page.locator("footer [data-footer-connect]");
+const copyrightLine = (page: Page) => page.locator("footer [data-footer-copyright]");
+const LOGO = { width: 1536, height: 1024, inkTop: 244, inkBottom: 844 };
 const layers = (page: Page) => page.locator("footer [data-wave-layer]");
 const control = (page: Page) => footer(page).locator("[data-footer-body] button");
 const waveState = (page: Page) => surface(page).getAttribute("data-wave-state");
@@ -66,15 +73,16 @@ const VIEWPORTS = [
   { width: 320, height: 568, gap: 56, gutter: 16, wave: 64 },
 ];
 
-test("one landmark after main: charcoal groups, then the logo band; no removed content", async ({ page }) => {
+test("one landmark after main: the charcoal area alone, logo inside; no removed content", async ({ page }) => {
   await open(page, 1440, 900);
   const f = footer(page);
   await expect(f).toHaveCount(1);
   expect(await page.evaluate(() => document.querySelector("main")!.nextElementSibling?.tagName)).toBe("FOOTER");
-  // Both areas inside the one footer, in order.
+  // One area: the ivory logo band below the footer is gone.
   expect(
     await f.evaluate((el) => [...el.children].map((child) => Object.keys((child as HTMLElement).dataset)[0]))
-  ).toEqual(["footerSurface", "footerBrand"]);
+  ).toEqual(["footerSurface"]);
+  await expect(page.locator("[data-footer-brand]")).toHaveCount(0);
 
   // Group headings, in order.
   await expect(f.getByRole("heading", { level: 2 })).toHaveText(["Explore", "Our Services", "Visit AKSH", "Connect"]);
@@ -104,12 +112,20 @@ test("one landmark after main: charcoal groups, then the logo band; no removed c
     await expect(page.locator(`main li#service-${category.id} [data-service-card]`)).toHaveCount(1);
   }
 
-  // The logo once, in the ivory band, linking home; the copyright beneath it.
-  await expect(f.locator('img[src*="aksh-wellness-logo"]')).toHaveCount(1);
-  const home = brand(page).getByRole("link", { name: "AKSH Wellness - Return to home" });
+  // Exactly one footer logo: the transparent inverse artwork, in the Connect
+  // column after its details, linking home; no logo band or wrapper below.
+  await expect(f.getByRole("img")).toHaveCount(1);
+  await expect(page.locator("[data-footer-signoff], [data-footer-brand]")).toHaveCount(0);
+  const logo = connectColumn(page).getByRole("img", { name: "AKSH Wellness" });
+  expect(decodeURIComponent((await logo.getAttribute("src"))!)).toContain("/brand/aksh-wellness-logo-inverse-transparent.png");
+  await expect(logo).toHaveAttribute("width", String(LOGO.width));
+  await expect(logo).toHaveAttribute("height", String(LOGO.height));
+  expect(
+    await connectColumn(page).evaluate((column) => [...column.children].map((child) => child.tagName + (child.hasAttribute("data-footer-logo") ? ".logo" : "")))
+  ).toEqual(["SECTION", "DIV.logo"]);
+  const home = connectColumn(page).getByRole("link", { name: "AKSH Wellness - Return to home" });
   await expect(home).toHaveAttribute("href", "/");
-  await expect(brand(page).getByText(`© ${new Date().getFullYear()} ${rights}`, { exact: true })).toBeVisible();
-  await expect(body(page).locator("img")).toHaveCount(0);
+  await expect(copyrightLine(page)).toHaveText(`© ${new Date().getFullYear()} ${rights}`);
 
   // The former brand tagline and invitation block are gone.
   await expect(f).not.toContainText("Modern wellness. Personalised care.");
@@ -187,7 +203,13 @@ test("keyboard: every footer control is reachable with a visible focus ring", as
   await open(page, 1440, 900);
   // Start from the last FAQ control, then tab forward into the footer.
   await page.locator("#faq [data-faq-support] button").focus();
-  const onCharcoal = [...explore.links.map((l) => l.label), ...services.links.map((l) => l.label), "Pause waves"];
+  // Every control is on charcoal now, the logo included.
+  const onCharcoal = [
+    ...explore.links.map((l) => l.label),
+    ...services.links.map((l) => l.label),
+    "AKSH Wellness - Return to home",
+    "Pause waves",
+  ];
   for (const name of onCharcoal) {
     await page.keyboard.press("Tab");
     const focused = page.locator(":focus");
@@ -198,18 +220,12 @@ test("keyboard: every footer control is reachable with a visible focus ring", as
     await expect(focused).toHaveCSS("outline-style", "solid");
     await expect(focused).toHaveCSS("outline-color", "rgb(249, 248, 244)");
   }
-  // The logo, on ivory, keeps the standard black ring.
-  await page.keyboard.press("Tab");
-  const logo = page.locator(":focus");
-  await expect(logo).toHaveAccessibleName("AKSH Wellness - Return to home");
-  await expect(logo).toHaveCSS("outline-style", "solid");
-  await expect(logo).toHaveCSS("outline-color", "rgb(0, 0, 0)");
   // The waves are decorative: nothing in them takes focus or is announced.
   await expect(footer(page).locator("[data-footer-wave]")).toHaveAttribute("aria-hidden", "true");
 });
 
 for (const vp of VIEWPORTS) {
-  test(`layout at ${vp.width}x${vp.height}: full width, waves, columns, logo band, targets, no overflow`, async ({ page }) => {
+  test(`layout at ${vp.width}x${vp.height}: full width, waves, aligned columns, centred logo, targets, no overflow`, async ({ page }) => {
     await open(page, vp.width, vp.height);
     await toWaves(page);
     expect(await overflow(page)).toBe(0);
@@ -218,7 +234,6 @@ for (const vp of VIEWPORTS) {
     await expect(body(page)).toHaveCSS("border-radius", "0px");
     await expect(body(page)).toHaveCSS("box-shadow", "none");
     await expect(footer(page)).toHaveCSS("position", "static");
-    await expect(brand(page)).toHaveCSS("background-color", "rgb(249, 248, 244)");
 
     // Four layers of charcoal, rising opacity back to front; the front opaque.
     await expect(layers(page)).toHaveCount(4);
@@ -238,7 +253,6 @@ for (const vp of VIEWPORTS) {
       const band = box("footer [data-footer-wave]");
       const svg = box("footer [data-footer-wave] svg");
       const body = box("footer [data-footer-body]");
-      const brand = box("footer [data-footer-brand]");
       const container = box("#faq .aksh-container");
       const grid = box("footer [data-footer-body] .aksh-container > div:first-child");
       const bodyEl = document.querySelector("footer [data-footer-body]")!;
@@ -266,7 +280,7 @@ for (const vp of VIEWPORTS) {
         band: { top: band.top, height: band.height },
         svg: { left: svg.left, width: svg.width, bottom: svg.bottom },
         body: { left: body.left, width: body.width, top: body.top, bottom: body.bottom },
-        brand: { left: brand.left, width: brand.width, top: brand.top, bottom: brand.bottom + window.scrollY },
+        bottom: footer.bottom + window.scrollY,
         container: { left: container.left, width: container.width },
         grid: { left: grid.left, width: grid.width },
         page: document.documentElement.scrollHeight,
@@ -275,14 +289,15 @@ for (const vp of VIEWPORTS) {
       };
     });
 
-    // Edge to edge, in flow: the FAQ's section gap above, nothing below the logo band.
+    // Edge to edge, in flow: the FAQ's section gap above, the charcoal footer
+    // ending the page.
     expect(Math.round(g.gap)).toBe(vp.gap);
-    for (const area of [g.surface, g.svg, g.body, g.brand]) {
+    for (const area of [g.surface, g.svg, g.body]) {
       expect(area.left).toBe(0);
       expect(area.width).toBe(g.viewport);
     }
-    expect(Math.round(g.brand.top)).toBe(Math.round(g.body.bottom));
-    expect(Math.round(g.brand.bottom)).toBe(g.page);
+    expect(Math.round(g.body.bottom + (await page.evaluate(() => window.scrollY)))).toBe(g.page);
+    expect(Math.round(g.bottom)).toBe(g.page);
     // Content in the site container, with its gutters.
     expect(g.grid.left).toBeCloseTo(g.container.left, 0);
     expect(g.grid.width).toBeCloseTo(g.container.width, 0);
@@ -328,15 +343,120 @@ for (const vp of VIEWPORTS) {
       expect((await target.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     }
 
-    // Logo band: the artwork unaltered and centred, the copyright small beneath it.
-    const logo = brand(page).locator('img[src*="aksh-wellness-logo"]');
-    await expect(logo).toHaveCSS("width", "240px");
-    await expect(logo).toHaveCSS("height", "184px");
-    const frame = (await brand(page).getByRole("link").boundingBox())!;
-    expect(frame.x + frame.width / 2).toBeCloseTo(g.viewport / 2, 0);
-    const copyright = brand(page).getByText(rights, { exact: false });
-    await expect(copyright).toHaveCSS("font-size", "14px");
-    expect((await copyright.boundingBox())!.y).toBeGreaterThan(frame.y + frame.height);
+    // One rhythm in every column: headings level, left-aligned with their
+    // content, 16px above the first line of text; lines on 44px rows.
+    const columns = await page.evaluate(() =>
+      [...document.querySelectorAll("footer [data-footer-grid] > *")].map((group) => {
+        const column = group.getBoundingClientRect();
+        const heading = group.querySelector("h2")!.getBoundingClientRect();
+        const headingRow = group.querySelector("h2")!.parentElement!.getBoundingClientRect();
+        // Each row's first line of text: the row's top plus its inset.
+        const rows = [...group.querySelectorAll<HTMLElement>("li > a, address, dd")];
+        const inset = (el: HTMLElement) => Number.parseFloat(getComputedStyle(el).paddingTop);
+        const firstLines = rows.map((el) => el.getBoundingClientRect().top + inset(el));
+        // The heading block (signal dot and label, like every eyebrow on the
+        // site) starts at the column edge, with the content beneath it.
+        const lefts = [
+          group.querySelector("h2")!.parentElement!,
+          ...group.querySelectorAll<HTMLElement>("li > a, address, dt, [data-content-status] > p"),
+        ].map((el) => el.getBoundingClientRect().left);
+        return {
+          left: Math.round(column.left),
+          headingTop: Math.round(heading.top),
+          headingGap: firstLines[0] - headingRow.bottom,
+          pitch: firstLines.slice(1).map((y, i) => Math.round(y - firstLines[i])),
+          rowHeights: rows.map((el) => Math.round(el.getBoundingClientRect().height)),
+          lefts: lefts.map(Math.round),
+          textAlign: getComputedStyle(group).textAlign,
+        };
+      })
+    );
+    expect(columns).toHaveLength(4);
+    for (const column of columns) {
+      expect(column.headingGap).toBeCloseTo(16, 0);
+      expect(column.textAlign).toBe("start");
+      // Headings, links, details and the placeholder label all start at the column's left edge.
+      for (const left of column.lefts) expect(left).toBe(column.left);
+    }
+    // Links and contact rows: one 44px pitch (the address grows by its own lines).
+    for (const column of [columns[0], columns[1], columns[3]]) {
+      for (const pitch of column.pitch) expect(pitch).toBe(44);
+    }
+    for (const height of [...columns[0].rowHeights, ...columns[1].rowHeights]) expect(height).toBe(44);
+    if (vp.width >= 1024) {
+      // Four equal columns, headings on one line.
+      expect(new Set(columns.map((c) => c.headingTop)).size).toBe(1);
+      const widths = await page.evaluate(() =>
+        [...document.querySelectorAll("footer [data-footer-grid] > *")].map((el) => Math.round(el.getBoundingClientRect().width))
+      );
+      expect(new Set(widths).size).toBe(1);
+    } else if (vp.width >= 768) {
+      expect(columns[0].headingTop).toBe(columns[1].headingTop);
+      expect(columns[2].headingTop).toBe(columns[3].headingTop);
+    }
+
+    // The logo: in the Connect column, centred in it, within its width, its
+    // artwork 24px below the details; the box holds the artwork rows only.
+    const logo = connectColumn(page).getByRole("img", { name: "AKSH Wellness" });
+    await logo.scrollIntoViewIfNeeded();
+    await logo.evaluate((img: HTMLImageElement) => img.decode());
+    const s = await page.evaluate((art) => {
+      const box = (el: Element) => el.getBoundingClientRect();
+      const column = document.querySelector("footer [data-footer-connect]")!;
+      const details = column.querySelector("section")!;
+      const img = column.querySelector("img")!;
+      const link = img.closest("a")!;
+      const copyright = document.querySelector("footer [data-footer-copyright]")!;
+      const control = document.querySelector("footer [data-footer-body] button")!.parentElement!;
+      const grid = document.querySelector("footer [data-footer-grid]")!;
+      const container = box(document.querySelector("footer [data-footer-body] .aksh-container")!);
+      const mid = (r: DOMRect) => r.left + r.width / 2;
+      const range = document.createRange();
+      range.selectNodeContents(copyright);
+      const text = range.getBoundingClientRect();
+      const r = box(img);
+      return {
+        width: r.width,
+        height: r.height,
+        columnWidth: box(column).width,
+        natural: [img.naturalWidth, img.naturalHeight],
+        inColumn: r.left >= box(column).left - 0.5 && r.right <= box(column).right + 0.5,
+        logoCentre: mid(r) - mid(box(column)),
+        artworkTop: r.top + (r.height * art.inkTop) / art.height,
+        artworkBottom: r.top + (r.height * (art.inkBottom + 1)) / art.height,
+        detailsBottom: box(details).bottom,
+        linkTop: box(link).top,
+        linkBottom: box(link).bottom,
+        linkHeight: box(link).height,
+        gridBottom: box(grid).bottom,
+        copyrightCentre: mid(text) - mid(container),
+        copyrightTop: box(copyright).top,
+        controlCentre: mid(box(control.firstElementChild!)) - mid(container),
+        pointerEvents: getComputedStyle(img).pointerEvents,
+        background: getComputedStyle(img).backgroundColor,
+      };
+    }, LOGO);
+    expect(s.width).toBeCloseTo(Math.min(240, s.columnWidth), 0);
+    expect(Math.abs(s.height - (s.width * LOGO.height) / LOGO.width)).toBeLessThanOrEqual(1);
+    // The delivered copy keeps the ratio (to a pixel of rounding), fitted, never stretched.
+    expect(Math.abs(s.natural[0] / s.natural[1] - LOGO.width / LOGO.height)).toBeLessThanOrEqual(0.01);
+    await expect(logo).toHaveCSS("object-fit", "contain");
+    expect(s.inColumn).toBe(true);
+    expect(Math.abs(s.logoCentre)).toBeLessThanOrEqual(0.5);
+    // Balanced space above: 24px from the details to the artwork (the box is rounded to a pixel).
+    expect(Math.abs(s.artworkTop - s.detailsBottom - 24)).toBeLessThanOrEqual(1);
+    expect(Math.abs(s.linkTop - s.artworkTop)).toBeLessThanOrEqual(1);
+    expect(Math.abs(s.linkBottom - s.artworkBottom)).toBeLessThanOrEqual(1);
+    expect(s.linkHeight % 1).toBe(0);
+    // No tile: the artwork is on transparency over the charcoal.
+    expect(s.background).toBe("rgba(0, 0, 0, 0)");
+    expect(s.pointerEvents).toBe("none");
+    // The logo stays inside the grid; the copyright and control follow, centred.
+    expect(s.linkBottom).toBeLessThanOrEqual(s.gridBottom + 0.5);
+    expect(s.copyrightTop).toBeGreaterThan(s.gridBottom);
+    expect(Math.abs(s.copyrightCentre)).toBeLessThanOrEqual(0.5);
+    expect(Math.abs(s.controlCentre)).toBeLessThanOrEqual(0.5);
+    await expect(copyrightLine(page)).toHaveCSS("font-size", "14px");
   });
 }
 
@@ -432,14 +552,13 @@ test("the control's row is reserved: it is the same height with and without Java
     await page.evaluate(() => document.fonts.ready);
     if (javaScriptEnabled) await expect(control(page)).toBeVisible();
     const row = (await control(page).locator("..").boundingBox())!.height;
-    const brandHeight = (await brand(page).boundingBox())!.height;
     await context.close();
-    return { row, brandHeight };
+    return row;
   };
   expect(await measure(true)).toEqual(await measure(false));
 });
 
-test("without JavaScript: the waves, links and logo band are complete and usable", async ({ browser }) => {
+test("without JavaScript: the waves, links, logo and copyright are complete and usable", async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto("/");
@@ -453,8 +572,9 @@ test("without JavaScript: the waves, links and logo band are complete and usable
   for (const link of [...explore.links, ...services.links]) {
     await expect(f.getByRole("link", { name: link.label, exact: true }).first()).toHaveAttribute("href", link.href);
   }
-  await expect(brand(page).locator('img[src*="aksh-wellness-logo"]')).toBeVisible();
-  await expect(brand(page)).toContainText(rights);
+  // The logo is static, so it shows even where the placeholder details do not.
+  await expect(connectColumn(page).getByRole("img", { name: "AKSH Wellness" })).toBeVisible();
+  await expect(copyrightLine(page)).toContainText(rights);
   // The placeholder groups are read per request and stream in with
   // JavaScript (like the testimonial samples); they never reach production.
   await expect(f.getByRole("region", { name: "Visit AKSH" })).toHaveCount(0);

@@ -47,6 +47,15 @@ export interface FooterContent {
       instagram: FooterContactValue & { profileUrl: string };
     };
   };
+  /**
+   * The footer logo, in the Connect column: the owner-supplied inverse artwork
+   * on transparency (ivory lettering and rules, red dots), archived
+   * byte-for-byte as assets/source/brand/logotransparent2.png and served as
+   * public/brand/aksh-wellness-logo-inverse-transparent.png. `ink`: first and
+   * last pixel rows holding artwork; the rows outside are the file's own
+   * transparent margin, which the layout offsets rather than crops.
+   */
+  logo: { src: string; alt: string; width: number; height: number; ink: { top: number; bottom: number } };
   /** Follows "© <year> ". */
   rights: string;
 }
@@ -92,6 +101,13 @@ export const footerContent: FooterContent = {
         href: null,
       },
     },
+  },
+  logo: {
+    src: "/brand/aksh-wellness-logo-inverse-transparent.png",
+    alt: "AKSH Wellness",
+    width: 1536,
+    height: 1024,
+    ink: { top: 244, bottom: 844 },
   },
   rights: "AKSH. All rights reserved.",
 };

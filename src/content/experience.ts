@@ -32,6 +32,12 @@ export interface ExperienceContent {
     alt: string;
     width: number;
     height: number;
+    /**
+     * First and last pixel rows holding lettering (alpha >= 2); the rows
+     * outside them are the file's own transparent margin, which the layout
+     * offsets rather than crops.
+     */
+    ink: { top: number; bottom: number };
   };
   heading: string;
   /** Rendered italic. */
@@ -50,14 +56,15 @@ const illustration = (file: string) => ({
 
 export const experienceContent: ExperienceContent = {
   id: "experience",
-  // Trimmed display copy of assets/source/brand/the-aksh-experience-artwork.png:
-  // the measured lettering, A, crescent and dot plus a 28px margin on every
-  // side; a pixel crop, not redrawn or rescaled.
+  // The owner-supplied file exactly as received (15 Oct 2026), byte-identical
+  // to assets/source/brand/the-aksh-experience-artwork-2026-10-15.png: not
+  // cropped, resized, recoloured or re-encoded, and served unoptimised.
   artwork: {
-    src: "/brand/the-aksh-experience-masthead.png",
+    src: "/brand/the-aksh-experience-masthead-2026-10-15.png",
     alt: "The AKSH Experience",
-    width: 1920,
-    height: 261,
+    width: 2048,
+    height: 682,
+    ink: { top: 210, bottom: 408 },
   },
   heading: "Your Wellness Journey, Simplified.",
   tagline: "Thoughtfully designed, personally guided, and centred around you.",

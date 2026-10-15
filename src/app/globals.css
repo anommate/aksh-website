@@ -123,6 +123,60 @@
 }
 
 /*
+ * Services progress line (src/components/sections/service-stack.tsx). A
+ * zero-height sticky marker directly above the card list, scoped to the
+ * Services content (its containing block), stuck at the reading line: the
+ * first card's sticky top. Above it, a band of page colour fills the gap
+ * between the header and that line, so content scrolling up passes beneath
+ * the line, never under it; the line is centred in that band. The client
+ * sets --service-progress (0 to 1) and removes `hidden`; without JavaScript
+ * the indicator never shows. Under reduced motion it follows exactly, without
+ * smoothing.
+ */
+@layer components {
+  [data-service-progress] {
+    position: sticky;
+    top: calc(var(--header-height) + var(--border-width) + var(--service-stack-gap));
+    /* Above the stacked cards (z-index 1 to 4), below the header. */
+    z-index: 10;
+    height: 0;
+    pointer-events: none;
+  }
+
+  [data-service-progress-band] {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: var(--service-stack-gap);
+    background-color: var(--surface-page);
+  }
+
+  [data-service-progress-track] {
+    position: absolute;
+    inset-inline: 0;
+    bottom: calc((var(--service-stack-gap) - var(--service-progress-height)) / 2);
+    height: var(--service-progress-height);
+    overflow: hidden;
+    background-color: var(--color-warm-stone);
+  }
+
+  [data-service-progress-fill] {
+    position: absolute;
+    inset: 0;
+    background-color: var(--color-signal-red);
+    transform-origin: 0 50%;
+    transform: scaleX(var(--service-progress, 0));
+    transition: transform var(--duration-fast) linear;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-service-progress-fill] {
+      transition: none;
+    }
+  }
+}
+
+/*
  * Section divider (src/components/ui/section-divider.tsx). Complete by
  * default; the client collapses the segments towards the dot while the
  * divider is off screen, then draws them once on first entry.

@@ -18,7 +18,19 @@ export interface ConsultantTextRun {
 
 export interface ConsultantContent {
   id: string;
-  eyebrow: string;
+  /** Owner-supplied "MEET OUR CONSULTANT" masthead lettering; replaces the typed eyebrow. */
+  artwork: {
+    src: string;
+    alt: string;
+    width: number;
+    height: number;
+    /**
+     * First and last pixel rows holding lettering (alpha >= 2); the rows
+     * outside them are the file's own transparent margin, which the layout
+     * offsets rather than crops.
+     */
+    ink: { top: number; bottom: number };
+  };
   name: string;
   /** Rendered bold. */
   role: string;
@@ -37,7 +49,16 @@ export interface ConsultantContent {
 
 export const consultantContent: ConsultantContent = {
   id: "meet-our-consultant",
-  eyebrow: "MEET OUR CONSULTANT",
+  // The owner-supplied file exactly as received (15 Oct 2026), byte-identical
+  // to assets/source/brand/meet-our-consultant-artwork-2026-10-15.png: not
+  // cropped, resized, recoloured or re-encoded, and served unoptimised.
+  artwork: {
+    src: "/brand/meet-our-consultant-masthead-2026-10-15.png",
+    alt: "Meet Our Consultant",
+    width: 2048,
+    height: 682,
+    ink: { top: 281, bottom: 394 },
+  },
   name: "Dr. Priyanka Masharkar",
   role: "Aesthetic Dermatologist | Wellness & Aesthetic Consultant",
   tagline: "Where medical expertise meets a personalised approach to wellbeing.",

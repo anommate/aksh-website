@@ -12,7 +12,12 @@ import { aboutContent } from "@/content/about";
  *
  * Visual Direction per AKSH_DESIGN.md v2.0:
  * - Background: Warm Brand Ivory (#F9F8F4)
- * - Prominent Masthead Artwork: Stylised black A, ABOUT US lettering, underline rules and red dot
+ * - Masthead: the owner-supplied "ABOUT US" artwork (oversized A and lettering),
+ *   whole and as supplied, transparent margins included, centred up to 560px
+ *   wide (the container width below). Negative margins sized from its
+ *   measured lettering rows (in % of its own width) offset those margins, so
+ *   the lettering starts at the content top and sits 24px (28px from tablet)
+ *   above the eyebrow; its box is rounded to whole pixels
  * - Typography: Cormorant Garamond (display/quote) & Manrope (body/UI)
  * - Spacing: Section gap tokens (90px desktop, 72px tablet, 56px mobile)
  * - Desktop: 2-column editorial grid (left: eyebrow, H2, tagline; right: paragraphs, CTA)
@@ -21,6 +26,13 @@ import { aboutContent } from "@/content/about";
  */
 export function AboutSection() {
   const { openUnavailableNotice } = useDevelopmentNotice();
+  const { artwork } = aboutContent;
+  // Transparent rows above and below the lettering, as % of the image width
+  // (vertical margin percentages resolve against the wrapper's width, which is
+  // the image's).
+  const marginAbove = (artwork.ink.top / artwork.width) * 100;
+  const marginBelow = ((artwork.height - 1 - artwork.ink.bottom) / artwork.width) * 100;
+  const letteringRatio = (artwork.ink.bottom - artwork.ink.top + 1) / artwork.width;
 
   const handleCtaClick = () => {
     openUnavailableNotice(aboutContent.cta.destinationName, aboutContent.cta.href);
@@ -33,17 +45,34 @@ export function AboutSection() {
       className="w-full py-32 tablet:py-40 desktop:py-32 bg-brand-ivory scroll-mt-80 tablet:scroll-mt-64"
     >
       <Container>
-        {/* Prominent Centered Masthead Artwork above editorial content */}
-        <div className="w-full flex justify-center mb-20 tablet:mb-24 desktop:mb-24">
-          <div className="relative w-full max-w-[440px] flex justify-center">
+        {/* Masthead artwork, centred; a size container so its box can be sized from its own width. */}
+        <div className="@container w-full flex justify-center mb-24 tablet:mb-28">
+          {/*
+            The box holds the lettering rows only, rounded to a whole pixel;
+            the image overflows it into its own transparent margins. Without
+            round() the image's negative margins give the same layout, unrounded.
+          */}
+          <div
+            data-about-masthead
+            className="w-full max-w-(--about-masthead-width)"
+            style={{
+              height: `round(nearest, min(var(--about-masthead-width), 100cqw) * ${letteringRatio}, 1px)`,
+            }}
+          >
             <Image
-              src={aboutContent.artwork.src}
-              alt={aboutContent.artwork.alt}
-              width={aboutContent.artwork.width}
-              height={aboutContent.artwork.height}
+              src={artwork.src}
+              alt={artwork.alt}
+              width={artwork.width}
+              height={artwork.height}
               priority
+              // The supplied file itself, never a resized or re-encoded copy.
+              unoptimized
+              style={{
+                aspectRatio: `${artwork.width} / ${artwork.height}`,
+                marginTop: `${-marginAbove}%`,
+                marginBottom: `${-marginBelow}%`,
+              }}
               className="w-full h-auto object-contain select-none pointer-events-none"
-              sizes="(max-width: 768px) 100vw, 440px"
             />
           </div>
         </div>

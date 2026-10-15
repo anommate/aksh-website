@@ -16,7 +16,18 @@ type StackLayout = {
   offsets: number[];
   /** Bottom of the sticky header: the top of the visible stacking area. */
   visibleTop: number;
+  /**
+   * Where reading starts: the first card's sticky top, below the header and
+   * the progress line's band (which fills the gap between them).
+   */
+  readingTop: number;
 };
+
+/**
+ * Scroll distances, from the list's top, at which progress starts (the first
+ * card's top reaches the reading line) and ends (the last card settles).
+ */
+type ProgressRange = { start: number; end: number };
 
 /**
  * Ordered list of service cards with an optional "card stack".
@@ -40,7 +51,16 @@ type StackLayout = {
  * Scrolling stays native: the script never intercepts wheel, touch, or keys.
  * It reads card positions on scroll to let covered cards recede, and scrolls a
  * covered card back into view when it receives keyboard focus or is the
- * target of a link (#service-<id>). Heights are
+ * target of a link (#service-<id>).
+ *
+ * Above the list, a thin progress line (decorative, aria-hidden, hidden
+ * without JavaScript) sticks in the gap between the header and the first
+ * card's sticky top, on a band of page colour that content scrolls beneath.
+ * It fills from 0 when the first card's top reaches the reading line to 1 when
+ * the last card settles at its sticky top (a bottom-pinned tall card
+ * included), or, in normal flow, when the last card's top reaches the reading
+ * line. The same scroll frame that updates the cards sets it, through a CSS
+ * variable, so React never re-renders on scroll. Heights are
  * measured against the small viewport (100svh), which stays fixed while
  * mobile toolbars show and hide, so pinned cards do not jump.
  *
@@ -55,9 +75,11 @@ export function ServiceStack({
   className?: string;
 }) {
   const listRef = useRef<HTMLOListElement | null>(null);
+  const progressRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const list = listRef.current;
+    const progress = progressRef.current;
     if (!list) return;
 
     const items = Array.from(
@@ -80,6 +102,7 @@ export function ServiceStack({
 
     let active = false;
     let layout: StackLayout | null = null;
+    let range: ProgressRange | null = null;
     let measuredWidth = -1;
     let measuredViewport = -1;
     let frame = 0;
@@ -207,9 +230,46 @@ export function ServiceStack({
         list.dataset.stackTail = "";
       }
 
-      layout = { tops, heights, offsets, visibleTop };
+      layout = { tops, heights, offsets, visibleTop, readingTop: stepped[0] };
       active = true;
       updateDepth();
+    };
+
+    // From the stack's own geometry while stacked; otherwise from the cards'
+    // natural positions. The reading line is the progress line's sticky top.
+    const measureProgress = () => {
+      range = null;
+      if (!progress) return;
+      const readingTop = layout?.readingTop ?? Number.parseFloat(getComputedStyle(progress).top);
+      if (!Number.isFinite(readingTop)) return;
+      const last = items.length - 1;
+      if (active && layout) {
+        range = { start: layout.offsets[0] - readingTop, end: layout.offsets[last] - layout.tops[last] };
+      } else {
+        const listTop = list.getBoundingClientRect().top;
+        const natural = (index: number) => items[index].getBoundingClientRect().top - listTop;
+        range = { start: natural(0) - readingTop, end: natural(last) - readingTop };
+      }
+    };
+
+    const updateProgress = () => {
+      if (!progress || !range) return;
+      const scrollY = window.scrollY;
+      const listTop = list.getBoundingClientRect().top + scrollY;
+      const start = listTop + range.start;
+      // The page may end before the last card reaches the line (normal flow).
+      const end = Math.min(
+        listTop + range.end,
+        document.documentElement.scrollHeight - window.innerHeight
+      );
+      const value = end > start ? clamp01((scrollY - start) / (end - start)) : scrollY >= start ? 1 : 0;
+      progress.style.setProperty("--service-progress", value.toFixed(4));
+    };
+
+    // One scroll frame updates both the cards' depth and the progress line.
+    const update = () => {
+      updateDepth();
+      updateProgress();
     };
 
     const measure = () => {
@@ -227,6 +287,8 @@ export function ServiceStack({
       const growth = list.getBoundingClientRect().bottom + window.scrollY - (bottomBefore + scrollY);
       const target = viewBelowStack ? scrollY + growth : scrollY;
       if (window.scrollY !== target) window.scrollTo({ top: target, behavior: "instant" });
+      measureProgress();
+      updateProgress();
     };
 
     const schedule = (task: () => void) => {
@@ -242,14 +304,14 @@ export function ServiceStack({
       schedule(measure);
     };
 
-    const onScroll = () => schedule(updateDepth);
+    const onScroll = () => schedule(update);
     // Mobile toolbars resize the window while scrolling. The layout depends
     // only on the width and the small-viewport height, so re-measure (an
     // orientation change, a window resize) only when one of those changes.
     const onResize = () => {
       const width = document.documentElement.clientWidth;
       if (width === measuredWidth && stableViewportHeight() === measuredViewport) {
-        schedule(updateDepth);
+        schedule(update);
         return;
       }
       scheduleMeasure();
@@ -281,7 +343,7 @@ export function ServiceStack({
         const covered = items
           .slice(index + 1)
           .some((later) => later.getBoundingClientRect().top < targetRect.bottom);
-        const underHeader = targetRect.top < layout.visibleTop;
+        const underHeader = targetRect.top < layout.readingTop;
         if (!covered && !underHeader) return;
         const naturalTop = list.getBoundingClientRect().top + layout.offsets[index];
         window.scrollBy({ top: naturalTop - layout.tops[index], behavior: "instant" });
@@ -298,8 +360,8 @@ export function ServiceStack({
       if (index < 0) return;
       const naturalTop = list.getBoundingClientRect().top + layout.offsets[index];
       // A card taller than the window is pinned by its bottom edge; show its
-      // start instead, just below the header, before it pins.
-      const landing = Math.max(layout.tops[index], layout.visibleTop);
+      // start instead, just below the header and progress band, before it pins.
+      const landing = Math.max(layout.tops[index], layout.readingTop);
       window.scrollBy({ top: naturalTop - landing, behavior: "instant" });
     };
     // After the browser's own jump.
@@ -311,6 +373,8 @@ export function ServiceStack({
       if (link.hash === window.location.hash) window.requestAnimationFrame(settleOnHash);
     };
 
+    // The progress line is decorative and needs this script: show it now.
+    if (progress) progress.hidden = false;
     measure();
     if (window.location.hash) window.requestAnimationFrame(settleOnHash);
     document.fonts?.ready.then(() => {
@@ -337,12 +401,25 @@ export function ServiceStack({
       document.removeEventListener("click", onClick);
       viewportProbe.remove();
       turnOff();
+      if (progress) {
+        progress.hidden = true;
+        progress.style.removeProperty("--service-progress");
+      }
     };
   }, []);
 
   return (
-    <ol ref={listRef} data-stack="off" className={className}>
-      {children}
-    </ol>
+    <>
+      {/* Takes no height: the list and the cards keep their positions. */}
+      <div ref={progressRef} data-service-progress aria-hidden="true" hidden>
+        <div data-service-progress-band />
+        <div data-service-progress-track>
+          <div data-service-progress-fill />
+        </div>
+      </div>
+      <ol ref={listRef} data-stack="off" className={className}>
+        {children}
+      </ol>
+    </>
   );
 }

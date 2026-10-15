@@ -49,6 +49,12 @@ export interface ServicesSectionContent {
     alt: string;
     width: number;
     height: number;
+    /**
+     * First and last pixel rows holding lettering (alpha >= 2); the rows
+     * outside them are the file's own transparent margin, which the layout
+     * offsets rather than crops.
+     */
+    ink: { top: number; bottom: number };
   };
   eyebrow: string;
   heading: string;
@@ -62,13 +68,15 @@ export const serviceCardId = (id: string) => `service-${id}`;
 
 export const servicesContent: ServicesSectionContent = {
   id: "services",
-  // Trimmed display copy of assets/source/brand/our-services-artwork.png:
-  // the measured lettering, rules and dot plus a 24px margin on every side.
+  // The owner-supplied single-line file exactly as received (15 Oct 2026),
+  // byte-identical to assets/source/brand/our-services-artwork-2026-10-15.png:
+  // not cropped, resized, recoloured or re-encoded, and served unoptimised.
   artwork: {
-    src: "/brand/our-services-masthead.png",
+    src: "/brand/our-services-masthead-2026-10-15.png",
     alt: "Our Services",
-    width: 920,
-    height: 405,
+    width: 2048,
+    height: 682,
+    ink: { top: 273, bottom: 425 },
   },
   eyebrow: "DISCOVER WELLNESS AT AKSH",
   heading: "Thoughtfully Designed Around You.",
