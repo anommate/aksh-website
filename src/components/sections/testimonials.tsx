@@ -50,8 +50,8 @@ async function SampleTestimonials() {
             alt={artwork.alt}
             width={artwork.width}
             height={artwork.height}
-            sizes="(min-width: 1024px) 800px, (min-width: 768px) calc(100vw - 64px), calc(100vw - 40px)"
-            // The box keeps the artwork's own ratio, whichever resized copy loads.
+            // The same file at every width: never a resized or re-encoded variant.
+            unoptimized
             style={{ aspectRatio: `${artwork.width} / ${artwork.height}` }}
             className="w-full max-w-(--testimonials-masthead-width) h-auto object-contain select-none mb-20 tablet:mb-12"
           />
