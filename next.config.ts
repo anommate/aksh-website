@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    agentUpgrade: "security",
+  },
   async redirects() {
     return [
       // The AKSH Experience moved from its own page to a homepage section.
